@@ -1,0 +1,25 @@
+<?php
+/*
+ * Created on 2010/11/22
+ *
+ * To change the template for this generated file go to
+ * Window - Preferences - PHPeclipse - PHP - Code Templates
+ */
+
+class FieldAuthSet {
+	// ’l‚Æ‚µ‚Ä‚Í 0 or 1 ‚ªŠi”[‚³‚ê‚é‚Ì‚Å’ˆÓ
+	var $readAuth;
+	var $writeAuth;
+	var $exWriteAuth;
+	
+
+
+
+
+	public function __construct($readAuth, $writeAuth, $exWriteAuth) {
+		$this->readAuth = $readAuth;
+		$this->writeAuth = $writeAuth;
+		$this->exWriteAuth = $exWriteAuth;
+	}
+}
+?>

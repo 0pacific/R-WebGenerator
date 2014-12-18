@@ -1,0 +1,85 @@
+■テーブル表示（単体）
+
+□field_info
+SELECT * 
+FROM field_info
+ORDER BY tblNumber ASC , 
+OFFSET ASC 
+LIMIT 0 , 500
+
+□page_element
+SELECT * 
+FROM  `page_element` 
+ORDER BY  pageNumber,peNumber
+LIMIT 0 , 500
+
+□対フィールド権限一覧（講師アカウントテーブル）
+SELECT * 
+FROM field_auth
+WHERE tableNumber =2
+ORDER BY roleNumber ASC , accOwnRoleNumber ASC , 
+STATUS DESC , fieldNumber ASC 
+LIMIT 0 , 500
+
+
+
+
+■テーブル表示（複合）
+
+□対フィールド権限一覧（全テーブル）
+SELECT field_auth.roleNumber, field_auth.tableNumber, field_auth.fieldNumber, role.name, table_list.nameOnWeb, field_info.nameOnWeb, field_auth.status, field_auth.ra, field_auth.wa, field_auth.ea
+FROM field_auth
+JOIN field_info
+JOIN role
+JOIN table_list
+WHERE field_auth.tableNumber = field_info.tblNumber
+AND field_auth.fieldNumber = field_info.offset
+AND field_auth.roleNumber = role.number
+AND field_auth.tableNumber = table_list.primaryKey
+ORDER BY field_auth.tableNumber, field_auth.roleNumber, field_auth.status, field_auth.fieldNumber
+LIMIT 0 , 500
+
+□対フィールド権限一覧（講師アカウントテーブル）
+SELECT field_auth.roleNumber, field_auth.tableNumber, field_auth.fieldNumber, role.name, table_list.nameOnWeb, field_info.nameOnWeb, field_auth.status, field_auth.ra, field_auth.wa, field_auth.ea
+FROM field_auth
+JOIN field_info
+JOIN role
+JOIN table_list
+WHERE field_auth.tableNumber = field_info.tblNumber
+AND field_auth.tableNumber = 2
+AND field_auth.fieldNumber = field_info.offset
+AND field_auth.roleNumber = role.number
+AND field_auth.tableNumber = table_list.primaryKey
+ORDER BY field_auth.tableNumber, field_auth.roleNumber, field_auth.status, field_auth.fieldNumber
+LIMIT 0 , 500
+
+・ページエレメント一覧
+select page_element.pageNumber,pages.fileName,page_element.peNumber,page_element.peKind,page_element.primaryKey
+from page_element
+join pages
+where page_element.pageNumber=pages.pageNumber
+order by page_element.pageNumber, page_element.peNumber
+LIMIT 0 , 500
+
+
+・遷移プロセス一覧
+select
+transition.primaryKey as transProcKey,
+pages.pageNumber as startPageNumber,
+pages.fileName as startPageName,
+page_element.peNumber as peNumber,
+page_element.primaryKey as pePrimaryKey,
+page_element.peKind as peKind,
+transition.tepNumber as endPageNumber
+from transition
+join pages
+join page_element
+where transition.pePrimaryKey=page_element.primaryKey
+and pages.pageNumber=page_element.pageNumber
+order by pages.pageNumber
+
+
+
+
+
+
