@@ -21,6 +21,7 @@ import view.webPageDefinition.WebPagePanelManager;
 public class WebPageManager implements Serializable {
 	private ArrayList<WebPage> pages;
 	public WebPage logoutDestPage;
+	public WebPage ARButtonPage;
 	
 	/*
 	 * インスタンスは最後！
@@ -159,6 +160,16 @@ public class WebPageManager implements Serializable {
 
 	public void setLogoutDestPage(WebPage webPage) {
 		this.logoutDestPage = webPage;
+	}
+	
+	
+	// アプリ再編集ボタン配置場所関連【追加】
+	public WebPage getARButtonPage() {
+		return ARButtonPage;
+	}
+
+	public void setARButtonPage(WebPage webPage) {
+		this.ARButtonPage = webPage;
 	}
 
 

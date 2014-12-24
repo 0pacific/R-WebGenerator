@@ -127,7 +127,12 @@ public class PanelWebPageDefAbove extends JPanel implements ActionListener, Mous
 			// Webページ定義画面上での座標として現在設定されているX,Y座標を取得
 			int posX = webPagePanel.getPosX();
 			int posY = webPagePanel.getPosY();
-	
+			
+			// アプリ再編集ボタンが配置されているページの場合【追加】
+			if(WebPageManager.getInstance().getARButtonPage()==page){
+				webPagePanel.setBorder(WebPagePanel.ARBUTTON_PAGE_BORDER);
+			}
+			
 			// フォーカス中のページの場合
 			if(webPagePanel==focusedWebPagePanel) {
 				webPagePanel.setBackground(PanelWebPageDefAbove.pagePanelFocusedColor);

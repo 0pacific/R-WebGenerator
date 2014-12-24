@@ -56,6 +56,8 @@ public class PanelWebPageDefBottom extends JPanel implements ActionListener {
 
 	public JButton btnDeletePage;
 	
+	public JButton btnARButtonPage;//【追加】
+	
 	// PageElement編集画面への遷移ボタン
 	private JButton peEditButton;
 
@@ -69,6 +71,7 @@ public class PanelWebPageDefBottom extends JPanel implements ActionListener {
 	private JButton transitionButton_tableList;
 	public JButton transitionButton_generate;
 	public JButton btnEditTableAuth;
+	public JButton btnEditAdminAuth;//【追加】
 
 	// シリアライズボタン
 	ButtonSaveWork btnSaveWork;
@@ -127,6 +130,14 @@ public class PanelWebPageDefBottom extends JPanel implements ActionListener {
 		btnLogoutDestPage.addActionListener(this);
 		btnLogoutDestPage.setActionCommand("ログアウト遷移先定義");
 		
+		// アプリ再編集ボタンの場所を定義するボタン　【追加】
+		btnARButtonPage = japanese ? new JButton("アプリ再編集ボタンを配置する") : new JButton("Set an Application Remake Button");
+		Slpc.put(springLayout, "N", btnARButtonPage, "N", btnLogoutDestPage, 0);
+		Slpc.put(springLayout, "W", btnARButtonPage, "E", btnLogoutDestPage, 20);
+		add(btnARButtonPage);	
+		btnARButtonPage.addActionListener(this);
+		btnARButtonPage.setActionCommand("アプリ再編集ボタン配置");
+		
 		// Page Element 編集ボタン
 		peEditButton = japanese ? new JButton("ページ構成要素の編集") : new JButton("Edit Page Factors");
 		Slpc.put(springLayout, "N", peEditButton, "S", pageAddButton, 20);
@@ -175,10 +186,18 @@ public class PanelWebPageDefBottom extends JPanel implements ActionListener {
 		btnEditTableAuth.addActionListener(this);
 		btnEditTableAuth.setActionCommand("遷移：操作権限編集画面");
 		
+		// Admin（アプリケーション管理者）権限編集ボタン　【追加】
+		btnEditAdminAuth = japanese ? new JButton("管理者権限の編集") : new JButton("Edit Admin's Auth");
+		Slpc.put(springLayout, "N", btnEditAdminAuth, "N", btnEditTableAuth, 0);
+		Slpc.put(springLayout, "W", btnEditAdminAuth, "E", btnEditTableAuth, 20);
+		add(btnEditAdminAuth);	
+		btnARButtonPage.addActionListener(this);
+		btnARButtonPage.setActionCommand("アプリ再編集ボタン配置");
+		
 		// 生成画面への遷移ボタン
 		transitionButton_generate = japanese ? new JButton("生成画面へ") : new JButton("Go To Generation");
-		Slpc.put(springLayout, "N", transitionButton_generate, "N", btnEditTableAuth, 0);
-		Slpc.put(springLayout, "W", transitionButton_generate, "E", btnEditTableAuth, 20);
+		Slpc.put(springLayout, "N", transitionButton_generate, "N", btnEditAdminAuth, 0);
+		Slpc.put(springLayout, "W", transitionButton_generate, "E", btnEditAdminAuth, 20);
 		add(transitionButton_generate);
 		transitionButton_generate.addActionListener(this);
 		transitionButton_generate.setActionCommand("遷移：生成画面");
@@ -293,6 +312,24 @@ public class PanelWebPageDefBottom extends JPanel implements ActionListener {
 			}
 		}
 		
+		else if(cmd.equals("アプリ再編集ボタン配置")) {//【追加】
+			WebPage focusedPage = PanelWebPageDefAbove.getInstance().getFocusedWebPage();
+			if(focusedPage==null) {
+				Debug.error("上部パネルでフォーカスされているページがあるはずなのですが、nullのようです。", getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName());
+				return;
+			}
+			String msg5 = japanese ? "アプリ再編集ボタンを、"+focusedPage.pageFileName+"に配置します。よろしいですか？" : "Admin will go to "+focusedPage.pageFileName+" when Admin will remake launched application. OK?";
+			int confirm = JOptionPane.showConfirmDialog(this, msg5, japanese?"アプリ再編集ボタン配置":"Application Remake Button at", JOptionPane.OK_CANCEL_OPTION);
+			
+			if(confirm==JOptionPane.OK_OPTION) {
+				WebPageManager.getInstance().setARButtonPage(focusedPage);
+			}
+			// キャンセル
+			else if(confirm==JOptionPane.CANCEL_OPTION) {
+				return;
+			}
+		}
+		
 		// 「生成画面へ」ボタンクリック -> 移動
 		else if(cmd.equals("遷移：生成画面")) {
 			MainFrame.getInstance().shiftToGenerate();
@@ -373,11 +410,26 @@ public class PanelWebPageDefBottom extends JPanel implements ActionListener {
 			btnLogoutDestPage.setEnabled(false);
 		}
 	}
+	
+	public void informPageFocusARB() {
+		peEditButton.setEnabled(true);
+		btnDeletePage.setEnabled(true);
+		
+		// アプリ再編集ボタンが配置されていないページがフォーカスされたら、アプリ再編集ボタン配置ボタンを有効にする【追加】
+		WebPage focusedPage = PanelWebPageDefAbove.getInstance().getFocusedWebPage();
+		if(focusedPage!=WebPageManager.getInstance().getARButtonPage()) {
+			btnARButtonPage.setEnabled(true);
+		}
+		else {	// アプリ再編集ボタンが配置されているページがフォーカスされた場合
+			btnARButtonPage.setEnabled(false);
+		}
+	}
 
 	public void informPageUnfocus() {
 		peEditButton.setEnabled(false);
 		btnDeletePage.setEnabled(false);
 		btnLogoutDestPage.setEnabled(false);
+		btnARButtonPage.setEnabled(false);
 	}
 	
 	public void informTransitionFocus() {

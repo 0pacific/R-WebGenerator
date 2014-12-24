@@ -64,7 +64,8 @@ public class SqlGenerator implements Serializable {
 						"page_element_update_form_field, page_element_saif, role, table_list, " +
 						"tpp, tpp_constant_array_int, tpp_constant_array_string, tpp_create_form_reflection, tpp_create_reflection, " +
 						"tpp_da_input, tpp_et_load, tpp_ia_reflection, tpp_service_execution, tpp_service_execution_argument, " +
-						"tpp_update_form_reflection, tpp_update_reflection, transition, transition_auth, ";
+						"tpp_update_form_reflection, tpp_update_reflection, transition, transition_auth," + 
+						"application_remake_button, applpication_status, admin_auth_general, admin_auth_role, admin_auth_table ";//y’Ç‰Áz
 
 		// ‘ÎÇ—Ã–@idt0`dt99Aat0`at99‚ª‘¶İ‚·‚ê‚Î‘S‚Äíœ‚·‚éj
 		for(int i=0; i<100; i++) {

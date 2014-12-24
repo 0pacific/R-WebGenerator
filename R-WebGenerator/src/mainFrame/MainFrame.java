@@ -57,8 +57,8 @@ import webPage.*;
  * Singleton
  */
 public class MainFrame extends JFrame implements Serializable {
-	public static final int frameWidth = 880;
-	public static final int frameHeight = 600;
+	public static final int frameWidth = 1000;
+	public static final int frameHeight = 620;
 	public JPanel generatorPanel;
 	public SerializableSpringLayout genPanelLayout;
 

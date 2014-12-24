@@ -9,11 +9,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
 import debug.Debug;
-
 import view.EditPanel;
 import webPage.WebPage;
 
@@ -26,6 +27,7 @@ public class WebPagePanel extends EditPanel implements MouseListener {
 	public static final int PANEL_HEIGHT = 60;
 	
 	public static final Color COLOR_LOGOUT_DEST_PAGE = Color.BLACK;
+	public static final Border ARBUTTON_PAGE_BORDER = new LineBorder(Color.BLACK,3);
 	
 	// ëŒâûÇ∑ÇÈWebÉyÅ[ÉW
 	public WebPage page;
