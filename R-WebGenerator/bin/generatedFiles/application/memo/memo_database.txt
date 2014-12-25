@@ -1,0 +1,4 @@
+・整合性
+	・ia_possesion, ia_assign_auth
+	・page_element, page_element_***, transition（ページエレメントによる遷移の遷移先ページ番号を書かねばならない）
+	

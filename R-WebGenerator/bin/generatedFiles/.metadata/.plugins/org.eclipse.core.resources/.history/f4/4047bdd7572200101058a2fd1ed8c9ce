@@ -1,0 +1,330 @@
+R-Web　実行プログラム開発タスク
+
+■遷移を禁止されているハイパーリンクは表示しないようにする
+	
+★ログアウト機能の実装
+	★15:00
+	・ログアウト時の遷移先ページの名前を取得する関数
+	・ログアウト時の遷移先ページを記したテーブルをDBに作る
+
+・Display Area に仕様を変えたので、対応させる
+　複数の遷移プロセスに対応するようにした
+　ある遷移プロセスを通ってたどり着いた遷移先ページにDisplay Areaがあったとする
+　DBのpage_element_daテーブルを見て、その遷移プロセス中のTPPのTPPNが書かれているのでそのTPPの結果を表示
+　書かれていないことはありえない。
+
+■UpdateReflectionExecuter::execute()で、PASSWORD型の更新もちゃんとできるようにする（md5()で暗号化すること）
+
+・学生が自分のパスワードを変更できるようにする
+□講師が自分のパスワードを変更できるようにする
+・担当教員が自分のパスワードを変更できるようにする
+・担当教員が学生のパスワードを変更できるようにする
+・担当教員が講師のパスワードを変更できるようにする
+・講師アカウントの作成ができるようにする
+	□PageHtmlGenerator::generate()がCreate FormのHTMLも生成できるようにする
+		□CreationFormMakerのコンストラクタから$tableNumberを除去する
+		□CreationFormMakerのコンストラクタから$destPageNumberを除去する
+		□generate()修正
+	□Createフォーム作成部分の実装
+		□どのロールのアカウントを作るのか選択するプルダウンメニューを表示するようにする
+		□PASSWORD型の表示をできるようにする
+		□複数のレコードを作成できるよう、リクエスト名を配列形式にする（"[]"を最後につける）
+	・Createフォームからの全リクエストを受け取り、TFDにする部分の実装（UpdateReflectionExecuterを参考にせよ）
+		・CreateReflectionExecuterクラスの実装
+			・convCreFormToTfd()
+				・全データタイプに対応させること
+				□アカウントオーナーロール選択プルダウンメニューからのリクエストを受け取り、TabularFormDataRecordインスタンスにアカウントオーナーロール番号をセット、ROLE_NAME型の値も適切にセットするようにする
+			・execute()
+				・全データタイプに対応させること
+				・ファイルの作成と、失敗時のファイル削除を実装する
+				・ROLE_NAME型DDFの値と、アカウントオーナーロール番号フィールド（これはRDF）の値を適切に決めるようにする
+		□DBに page_element_create_form テーブル作成
+
+
+□レポートの提出ができないようなのでバグ取りする（ディレクトリを段階的に作成してないせいっぽい）
+
+□学生アカウントを作った際、同時にレポート提出表のレコードも作り、更にアサインさせるという遷移プロセスを実現する
+	□動作実験
+	□遷移プロセスをデータベースに記録する
+	□TransitionProcessExecuter::execute()で、IAリフレクションを扱えるようにする（TPP結果バッファには何も格納しない）
+		□実装
+	□TransitionProcessExecuter::execute()で、Createリフレクションを扱えるようにする（TPP結果バッファには「作成した全レコードを改めてDBのDDTから読み出しTFDにしたもの」を格納すること）
+		□実装
+	□TransitionProcessExecuter::execute()で、Createフォームリフレクションを扱えるようにする（TPP結果バッファには「作成した全レコードを改めてDBのDDTから読み出しTFDにしたもの」を格納すること）
+		□実装
+	□IAアサインリフレクションを作る
+	□RelatedRecordFinderクラスの作成・・・DDT番号とTFDを受け取り、TFDに対応したDDT中の全レコードのレコードロケーションを配列で返す（という関数を持った）クラス
+	□DdtTfdConverterクラスを修正
+		□convDdtToTfd()を呼び出しているところを修正（DdtTfdConverterインスタンスを生成し、インスタンスメソッドとして呼び出すようにする）
+		□DDT全体を変換するのか、レコード主キー配列を設定して該当するレコードだけ変換するのか、選択できるようにする
+		□アカウントテーブルの場合には、各TabularFormDataRecordインスタンスに、ロール番号・ユーザ番号の組（UserInfoインスタンス）を記録するようにする
+	□セルヒストリーという概念を廃止、レコードヒストリーを導入する
+		□TabularFormDataRecordクラス
+			□プログラム全体で、コンストラクタを呼び出している部分を、第二引数$recordHistoryも渡すように修正
+			□プログラム全体で、setCell()を使っている部分を、第三引数を渡さないように修正
+		□"セルロケーション"で検索し、全ての箇所を修正（FILE型など、セルロケーションを使うべき場所もあるのでそこは直すな！）
+		□RecordLocationクラス
+			□作成、適切に実装
+			□プログラム全体で、コンストラクタを呼び出している部分を、ちゃんと２つの引数を渡すよう修正
+			□プログラム全体で、equals()を呼び出している部分では、ちゃんと２つのRecordLocationインスタンスを渡しているかチェック
+			□プログラム全体で、findSame()を呼び出している部分では、ちゃんとRecordLocationインスタンス配列とRecordLocationインスタンスを渡しているかチェック
+		□"cellDataHistory"で検索（大文字・小文字区別なし）し、全ての箇所を修正
+		□全サービスの、セルヒストリーを扱っている部分を修正（レコードヒストリーを用いるようにする）
+			□Service1
+			□Service2
+			□Service3
+			□Service4
+		□TabularFormDataクラスを一通りチェック
+		□プログラム全体で、TabularFormDataコンストラクタを呼び出している部分を、レコードヒストリーを渡すよう修正
+		□TabularFormDataCellクラス
+			□プログラム全体で、インスタンス変数$cellHistoryを使っている部分を修正
+			□プログラム全体で、コンストラクタを呼び出している部分を、$valueだけ渡すように修正
+			□プログラム全体で、getCellHistory()を使っている部分を修正
+		□CellDataHistoryクラスを消去
+		□RecordHistoryクラスを作成
+	□UserInfoクラスを作成
+	□TabularFormDataRecordクラスを修正し、誰のアカウントなのかUserInfoインスタンスとして保持できるようにする
+	□ブランクサービスを作る
+	□特殊なデータタイプTYPE_BLANKをDataTypeクラスに作る（DDTには存在せず、TFDの中でしか用いられない）
+
+□レコードを作ったとき、アカウントテーブルなのであれば、IAのアサインも同時に行うようにする
+
+■対アカウント権限を実現したい
+	□講師アカウントテーブルを全てのロールがReadできるようにする
+		□CellAuthGetter::check()のアカウントテーブル対応部分を実装
+		□とりあえずread_lecturer_account.php に講師２としてアクセスしてみる
+	・いずれはgetAuthToData/AccountTable()２つの関数を１つにまとめる
+	・lecturer_password_change.php を完成
+		・ファイル作成
+		・ソースコード完成
+		・データベースでページエレメント定義
+	□AuthorityGetter::getAuthToDataTable()実装
+		□ソースコードを最初から最後まで見て、おかしなところを直す
+		□データベース中で、対データテーブル権限の場合には、アカウントオーナーロール番号は-1を格納すること
+	□AuthorityGetter::getAuthToAccountTable()実装
+		□関数の実装（一応getｔAuthToDataTable()との重複は記録しておくこと）
+		□データベースにおいて、ia_possesionとia_assign_authを適切に編集
+		
+	□TableInformationインスタンス初期化時、（アカウントテーブルならば）どのロールのアカウントを管理するのかデータベースで調べてインスタンス変数に記録するようにする
+		□TableInformation::initAccOwnRoleNumberArray()の実装
+	□データベース内で、講師アカウントテーブルにROLE_NAME型フィールドを作っておく
+	□field_authテーブルに、講師アカウントテーブルへの権限を記録しておく
+	□create_authテーブルに、講師アカウントテーブルへの権限を記録しておく
+	□delete_authテーブルに、講師アカウントテーブルへの権限を記録しておく
+	□ログインフォームをアカウントテーブルの新しい仕様に対応させる（新しい仕様とは、１つのアカウントテーブルで複数のロールのアカウントを管理できる仕様）
+		□login_lecturer.phpが正常に動作するようにする
+			□ソースコード作成
+			□データベースでログインフォーム作成（というか記録）
+			□ページエレメントを作成
+			□動作確認
+		□一応、login_root.phpも試す
+		□一応、login_student.phpも試す
+		□page_element_login_form の roleNumberフィールドを、accountTableNumberに変える（複数のロールが対応する可能性があるため）
+			□とりあえず変える
+			□accountTableNumberフィールドの値を適切なものに修正
+			□全アカウントテーブルに、"roleNumber"というRDFを作っておく（ロール番号を記録する。たとえ１つのロールのアカウントしか管理しないとしても）
+			□role_number,role_numberというデータタイプ名を新たに定義したので、これに応じてソースコードを加える必要がある
+				□FieldInformation::__construct() をこの２つに対応させた
+				□memo_program.txtにある「データタイプに関わる変更は、次の全ての場所に反映すること」に応じて変更
+			□これに合わせてプログラムも変更が必要だろう
+				□PageHtmlGeneratorクラス
+					□authenticateIfTried()の修正
+					□authenticateIfTried()を呼んでいるところを全て直す
+					□generate()のLogin Form対応部分の修正
+				□LoginManagerをこれに対応させねばならない
+					□authenticateIfTried()の修正
+					□authenticateIfTried()を呼んでいるところを全て直す
+					□checkLoginTried()の修正
+					□checkLoginTried()を呼んでいるところを全て直す
+					□makeLoginFormHtml()の修正
+					□makeLoginFormHtml()を呼んでいるところを全て直す
+					□executeLogin()の修正
+					□executeLogin()を呼んでいるところを全て直す
+				□page_element_login_form が登場するところをすべてチェック
+
+・担当教員が「合計点」の欄を見れるようにしよう
+	・read_root_sum.phpの作成
+		□ソースコード作成
+		□ページエレメント配置
+			□テキスト「各学生の合計点を表示しています。」
+			□Display Area
+				□page_element_daテーブルに12345と書いてあるが、TPPNが決まったらそれに書き換えること
+			□ハイパーリンク「レポート別得点表の閲覧画面へ戻る」
+			□ハイパーリンク「トップページへ」
+		・遷移プロセスの構築
+			・サービス実装
+				・フィールド抽出のサービスを再実装
+					・セルヒストリーをちゃんとコピーするようにしよう
+				・Summing Up のサービスを実装
+					・INT型でないフィールドが指定されてないかチェックするようにする
+					・出力TFDの合計点フィールドのmin,maxはとりあえずnullにしているが、ちゃんと計算するべき
+				・JOINのサービスを実装
+				・上記３つのサービスを実装してtest.phpでテストしたところ、セルヒストリーがちゃんと記録されてないっぽい（入るはずのTPPNがない）　直そう
+			□CellDataHistoryクラスの実装
+				□addRecordLocationIfNotExists() ... 指定したTPPNの履歴に指定したCellLocationインスタンスを加える（重複する場合は加えない）
+				□joinRecordHistory() ... ２つのCellDataHistoryインスタンスの履歴を結合した新たなCellDataHistoryインスタンスを返す（重複は排除）
+			・データベース
+				□transitionテーブルにインデックス作成（ページエレメントの主キーのみからなる）
+				・tppテーブルに記録
+				・tpp_*テーブルに記録
+	□login_root.phpの作成
+		□ソースコード完成
+		□ページエレメントとしてログインフォームを配置
+			□DBに記録しておく
+				□page_element
+				□page_element_login_form
+				□transition
+	□top_root.phpの作成
+		□ページエレメント配置
+			□テキスト「担当教員　トップページ」
+			□ハイパーリンク「提出状況確認」
+	□read_root.phpの作成
+		□PageHtmlGenerator::generate()でハイパーリンク２つのHTMLが生成されていないようだ　直そう
+		□ページエレメント配置
+			□テキスト「各学生の提出レポートとその得点を表示しています。」
+			□Table Display（レポート提出表）
+			□ハイパーリンク「合計点を確認」
+			□ハイパーリンク「トップページへ」
+
+・検索・ソート機能をつけたい
+
+・TransitionProcessExecuter::execute()で、データベースに変更をもたらすTPPは$permitDbInfectionがtrueのときだけ実行するようにすること（全TPPについてこれを守るように）
+
+・遷移プロセス実行時に遷移元ページからたった１つのページエレメントの情報を取得するとは限らない（複数かもしれない）ので、
+　「どんな遷移においてもWebページ中の全ページエレメントのデータをPOSTする」ように修正する
+
+	・すべてのページエレメントについて、クリックすると「JavaScriptを実行しフォームのactionを設定した後にsubmit()する」ようにする
+	　actionの値にはGETリクエスト"pepk"の値としてページエレメント主キーを含むようにする
+	　（遷移先ではこのGET値を見て、どの遷移プロセスを実行しようとしているのか判断する）
+		□ハイパーリンク（HyperLinkHtmlCreater::generate()）
+			□aタグのonClickがなぜか実行されないようだ　hrefが優先されてる？　コールバック関数をonClickで呼べばいいのかも
+		□ログインフォーム（LoginManager::makeLoginFormHtml()）
+			□makeLoginFormHtml()を呼び出しているところはすべて、第三引数（PageElementとしての主キー）を渡すようにする
+		□標準Update Form（UpdateFormGenerator::generateTableHtml()）
+		・標準Create Form	
+		・標準Delete Form
+		・その他
+
+	・標準フォーム中の値のリクエスト名には、ページエレメントの主キーを含むようにする（でないと異なるページエレメントで同じ名前のリクエストを持つ可能性がある）
+
+	・PageHtmlGeneratorクラス
+		・generate()
+			□各WebページのHTMLの最初と最後に<form>、</form>をそれぞれ出力するようにする（nameはpageElementsDataとでもしよう）
+			□$this->transProcNumberがnullならば遷移プロセスは実行せず、nullでなければ実行する
+			・$this->transProcNumberがnullなのに（いきなりそのWebページにアクセスしているのに）Display Areaなどがあったらおかしいので、
+			　一応そのエラーチェックも必要であろう
+		□checkTransition()
+			□GET値を見て、「他のWebページ中のPageElementによって遷移してきたのか否か」を判断する（フォームのsubmitボタンやハイパーリンクなど）
+			　具体的には、GETパラメータ"pePrimaryKey"があるかチェックする
+			□GETパラメータ"pePrimaryKey"があるならば、そのPageElementによる遷移の番号（つまり遷移プロセスの番号）を取得し、インスタンス変数にセット
+		□コンストラクタを呼び出している部分は、全部第二引数（$transProcNumber）を渡さない形に直す（なくしたので）
+
+	□今まで使っていたsubmitボタンはすべてただのボタンにし、onClick()中でactionの設定とsubmitを行うようにする
+		□UpdateFormGenerator::generateTableHtml()
+		□LoginManager::makeLoginFormHtml()
+	□今まで<form></form>を出力していた部分を削除する（PageHtmlGenerator::generate()で１ページの最初と最後に出力しているので）
+		□<form で検索し全部削除
+		□form> で検索し全部削除
+
+・TransitionProcessExecuter::execute()
+	・全TPPを実行できるようにする
+
+・Create, Update の標準フォームのactionの問題を解決する（memo_program.txtを参照）
+
+・UpdateFormGeneratorクラスの generateTableHtml(), generateCellHtml() で、Update権限を反映させるようにしたい
+	・generateTableHtml()
+
+		・フィールド限定で選ばれているフィールドだけ出力するようにする（TfdHtmlCreatorを参考にすればよい）
+			・PageHtmlGenerator::generate()
+				・フィールド限定されたフィールドの数が0個ないしDDF数超えだった場合、エラーを吐く
+				□フィールド限定をチェックしてオフセット配列を作って、UpdateFormGeneratorインスタンスに渡すようにする
+			□動作確認
+			□TfdHtmlCreator::makeTableHtml()を参考にしつつ、本関数を修正
+			□UpdateFormGeneratorコンストラクタを呼び出すところをすべて、４つ目の引数（フィールド限定のオフセット配列）を渡す形に修正
+
+		□全セル空欄（全角スペース１つ）の行は出力しないようにする（TfdHtmlCreatorを参考にすればよい）
+			□動作確認
+			□$blankRecCheckHtmlに関して、TfdHtmlCreatorと全く同じことをやる
+			□$recordHtml, $blankRecCheckHtml ともに、終了タグの後に"\n"をつけるようにする
+			□$recordHtmlに格納していき、１レコード分の作成プロセスの最後にそれを$htmlに付け足すようにする
+
+	・generateCellHtml()
+		・全データタイプのHTMLを作成できるようにする
+
+	・ExWriteされているか、されているなら自分か、を調べ、HTMLを適切に作るようにする
+
+	・FILE型のセルの更新フォームに、ファイル削除のチェックボックスをつける
+		（チェックしたらファイル選択が無効、外したら有効になる。JavaScriptで有効・無効を切り替えたいが、「選択できるが無効な場合は無意味」でもよいだろう）
+
+	□generateTableHtml()で、FILE型かつファイルが格納されている場合は、generateCellHtml()にFileValueインスタンスを渡すようにする
+	□makeCellHtml() にCellLocationインスタンスを渡すべきところでは渡すようにする
+	□TabularFormDataReadFormCreater::makeCellHtml() をstaticにする
+		□static をつける
+		□呼び出している部分をstatic形式に変更
+
+・ログアウト機能の実装
+	・ログアウトリンクをページエレメントとして追加できるよう、データベースを修正
+		※ロールごとに遷移先が決められている
+	・PageHtmlGenerator クラスに、ログアウトリンクのHTMLを作成する部分を実装
+
+・更新フォームのINTのテキストボックスなどから””が渡ってきた場合、それはデータベース上のnullと同一視する。（VARCHARでは""はOKなので注意）
+
+・Create, Update, Delete の標準フォームを使う際、確認画面を表示する機能をつけたい
+
+・UpdateReflectionExecuter execute()
+	・各データタイプに応じて正しい更新のしかたを書く
+	・「NullDataインスタンスを格納するべきケース」とコメントしてある部分だが、どんなケースがあるか詰めねばなるまい
+	・ファイルのアップロード（正確には一時アップロードファイルをちゃんとした場所にコピー）が完了したら、それまでセルの値としてあったファイルを削除する
+	・たとえばファイルを１０個アップロードするとき、６個目のアップロードに失敗したら、既にアップロードが完了されている１～５個目を消し、
+	　古い１～５個目を復元せねばならない。
+	　非常に面倒そうなので、ここは多分実装しない。
+
+・DdtTfdConverterクラス convDdtToTfd()を	ENUMに対応させる
+
+・更新リフレクションの実行について、「どのTPPに対応するレコードを更新するのか」を指定できる仕組みにする
+　現在、上書きデータ（これから書き込むデータ）が並べられ表になったTFDの、0,1,2...行目でDDTの0,1,2...行目を更新するという乱雑な仕様になっている
+	・UpdateReflectionExecuterクラス
+		・execute()で、どのTPPに対応したレコードを更新するのかチェックしそれに従うようにする	
+
+・DataTypeクラスをENUM型に対応させる（ENUMフィールドがどんな選択肢を持つかという情報を、DataTypeインスタンスに内包するようにする）
+
+
+
+
+
+□TfdHtmlCreator::makeTableHtml()で、権限を反映させるようにする
+	□TfdHtmlCreator::makeTableHtml()
+		□$authReflectの真偽によってちゃんと処理分けすること
+		□どのセルにもRead権限を持たないレコードは、<tr>と</tr>自体を出力しないようにする
+	□DdtTfdConverter::convDdtToTfdForTableDisplay()では、
+	　DdtTfdConverter::convDdtToTfd()に-1を渡しているが、ちゃんと動作するだろうか？実行して確認すること
+	□CellLocReadAuthMatcher::check()の、「データテーブルのあるセルに対するアクセスユーザのRead権限をチェックする部分」を実装する
+		□IaAssignmentChecker::check()にログ出力を実装
+		□CellLocReadAuthMatcher::check()の実装
+		□IaAssignmentChecker::check()を実装する（テーブルのあるレコードに対し、アクセスユーザがIA-Assignedかチェックする関数）
+		□FieldAuthSetクラスを実装
+			□インスタンス変数にRead, Write, ExWrite の権限値（0 or 1）を格納する
+			□ちゃんと 0 or 1 と注意書きすること
+□TFDにはUser Friendly Field しか記録しないように修正
+	□DdtTfdConverterクラスを修正しておいた
+□"ET Load"をすべて"DDT Load"にする
+□report_submit1.php
+	□ページ作成
+	□Updateフォームの遷移先を定義（report_confirm1.phpにする）
+□report_submit1.phpでレポートを提出した際、遷移先のreport_confirm1.phpでの更新作業が行うことがまだできない
+　report_submit1.phpから遷移してくるときの遷移プロセスを実行し、レポートが提出されるようにする
+	□データベースで遷移プロセスを定義する（report_submit1.phpのUpdate Formからのリクエストを受け取り、TFDにして、リフレクションする）
+	□遷移プロセスを調べ実行する部分を実装する
+		□どの遷移プロセスを実行しようとしているのか（どのページのどのページエレメントによって遷移してきたのか）を調べ、実行するようにする
+		□ちゃんと更新できていないようなので直そう
+			□ファイル選択フォームからのリクエストがなぜかテキストボックスなどからのリクエストと同様に扱われていたので直した。
+			　$_POST[リクエスト名]にファイル名が入っており、$_FILESは空配列となっていた。
+			　$html .= "<form method=\"post\" name=\"PageElementsData\" enctype=\"multipart/form-data\">\n";
+			　form開始タグに''を使っていたので全部""に直したらなぜか直った。全ての場面において""を使うようにしよう
+			□TransitionProcessExecuter::execute()のUpdate Form Reflection の部分で
+			　UpdateReflectionExecuterをインスタンス化した直後、addOffsetRelation()を行っていないことが判明。ちゃんとフィールド限定しよう
+			□UpdateReflectionExecuter::convUpdFormToTfd()のTFDが正しいか確かめる
+	□動作確認
+□report_confirm1.php にハイパーリンク追加
+□PEARのLogクラスが大量のファイルを開いているようなので、１つのファイルハンドラを使っていくように改変
+□TPPにどんなものが考えられるか列挙せよ

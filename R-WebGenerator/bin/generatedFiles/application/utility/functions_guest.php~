@@ -1,0 +1,19 @@
+<?php
+
+function getGuestRoleNumber() {
+	$query = 'SELECT * FROM ' . TABLE_GUEST_ROLE_NUMBER;
+	echoBr($query);
+	$result = mysql_query_logg($query);
+
+	// エラー : 結果の行数が１でない
+	if(mysql_num_rows($result)!==1) {
+		error_logg('グローバルメソッド ' . __FUNCTION__ . '() : 結果リソースの行数が１となっていません');
+		return null;
+	}
+
+	$number = mysql_result($result, 0, 0);
+
+	return $number;
+}
+
+?>

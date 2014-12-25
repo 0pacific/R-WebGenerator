@@ -1,0 +1,22 @@
+<?php
+/*
+ * Created on 2011/01/10
+ *
+ * To change the template for this generated file go to
+ * Window - Preferences - PHPeclipse - PHP - Code Templates
+ */
+
+class TransitionAuthorityManager {
+	public function getTransAuthByClientInfoAndTrggerPePrimKey($clientInfo, $triggerPePrimKey) {
+		// ‘JˆÚƒgƒŠƒK[PE‚É‚æ‚é‘JˆÚ‚Ì”Ô†
+		$transitionManager = new TransitionManager();
+		$transitionNumber = $transitionManager->getTransNumberByTriggerPePrimKey($triggerPePrimKey);
+
+		// ‚»‚Ì‘JˆÚ‚É‘Î‚·‚éƒAƒNƒZƒXƒ†[ƒU‚ÌŒ ŒÀ
+		$queryGetAuth =	"select * from transition_auth where transPrimaryKey=" . $transitionNumber
+						. " and roleNumber=" . $clientInfo->getRoleNumber();
+		$resultGetAuth = mysql_query_logg($queryGetAuth);
+		oneResultCheck($resultGetAuth, get_class($this), __FUNCTION__);
+	}
+} 
+?>

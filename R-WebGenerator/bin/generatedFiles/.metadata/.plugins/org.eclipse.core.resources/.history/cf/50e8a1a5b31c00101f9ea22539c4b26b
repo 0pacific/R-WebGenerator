@@ -1,0 +1,18 @@
+<?php
+/*
+ * Created on 2011/01/10
+ *
+ * To change the template for this generated file go to
+ * Window - Preferences - PHPeclipse - PHP - Code Templates
+ */
+
+class TransitionAuthorityManager {
+	public function getTransAuthByClientInfoAndTrggerPePrimKey($clientInfo, $triggerPePrimKey) {
+		// ‘JˆÚƒgƒŠƒK[PE‚É‚æ‚é‘JˆÚ‚Ì”Ô†Žæ“¾
+		$transitionManager = new TransitionManager();
+		$transitionNumber = $transitionManager->getTransNumberByTriggerPePrimKey($triggerPePrimKey);
+
+		$queryGetAuth = "select * from transition_auth where "
+	}
+} 
+?>

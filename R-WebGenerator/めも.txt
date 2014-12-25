@@ -1,0 +1,64 @@
+﻿tfd Tabuler Form Data 表の形式のデータ
+ddt Developer Defined Data 開発者定義データ
+uff User Friendly Field
+tpp Transition Prosess Part 遷移プロセス部品
+オフセット　相対位置
+array() 空の配列の作成
+ia individual authority 個人権限
+ra roll authrity ルール権限
+
+Application Remake Button (ARButton) アプリ再編集ボタン
+
+
+transaction 同時に２つ以上の変更をデータベースに行う際、整合性を取るために使う。いずれかの変更が失敗したらそれまでの変更をなかったコトにする。
+
+oneResultCheck MySQL結果セットが一行じゃない時にエラー
+mysql_query_logg mysql_query（クエリを送信し結果をリターン）と、ログ取り実行を同時に行う。
+nameOnDb at0とかdt1とか
+
+セッションについてhttp://www.phpbook.jp/tutorial/session/index1.html
+http://www.php-ref.com/web/02_session.html
+
+.exe化についてhttp://www.is.oit.ac.jp/~club/~hxs/?%BC%C2%B9%D4%B7%C1%BC%B0%A5%D5%A5%A1%A5%A4%A5%EB%A4%F2%C0%B8%C0%AE%A4%B7%A4%E8%A4%A6
+
+php myclass::myfunc
+=
+java myclass.myfunc
+
+__についてhttp://php.net/manual/ja/language.constants.predefined.php
+
+
+TabularFormDataクラスについて
+
+$valueTable２次元配列	$valueTable[record][field]
+	record→
+field
+↓
+
+TabularFormDataRecord レコード
+TabularFormDataCell レコードのセル（レコード内のCellArrayで管理）
+
+
+
+file_put_contents
+
+ファイルに書き込む場合、file_put_contents 関数を使用すれば以下のように書くことができます。
+
+<?php
+
+file_put_contents("sample.txt", "ファイルへの書き込みサンプル");
+
+?>
+
+これを実行すると、sample.txt の内容が ファイルへの書き込みサンプル になります。
+
+ファイルの内容全体を書き換えるので、fopen 関数、fwrite 関数、fclose 関数を使用したときのように「ファイルの末尾にデータを追加する」のような処理はできませんが、単純にファイルの内容全体を書き換えたい場合は、この関数が便利です。
+
+
+
+
+作業進行状況
+
+AppRemakeButtonを配置するページを選択するボタンを追加
+WebPage定義画面にのみAdminAuthへの遷移ボタンを定義ー＞この先やること
+

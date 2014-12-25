@@ -1,0 +1,420 @@
+<?php
+/*
+ * SUMMARY :
+ * 各WebページのHTMLを自動生成するクラス
+ * 
+ * Created on 2010/09/03
+ *
+ * To change the template for this generated file go to
+ * Window - Preferences - PHPeclipse - PHP - Code Templates
+ */
+
+class PageHtmlGenerator {
+	// 作ろうとするWebページの番号
+	var $pageNumber;
+
+	// どの遷移プロセスを実行しようと思って遷移してきているのか、その番号を格納する
+	// この遷移プロセスを実行した後、ページのHTMLを生成する
+	var $transProcNumber;
+	
+	
+	
+	
+	
+	public function __construct($pageNumber) {
+		logg_debug_call(__FUNCTION__, "PageHtmlGenerator");
+
+		$this->pageNumber = $pageNumber;
+		$this->checkTransition();
+
+		logg_debug_return(__FUNCTION__, "PageHtmlGenerator");
+	}
+
+
+
+
+
+	/*
+	 * SUMMARY :
+	 * 他のWebページから（フォームやハイパーリンクなどを用いて）遷移してきたのか、
+	 * いきなり本Webページにアクセスしてきたのかを判断し、$this->transProcNumberにセットする
+	 * 前者ならその遷移番号を、後者ならnullをセット
+	 */
+	public function checkTransition() {
+		// GETリクエスト"pepk"が来ている場合
+		// -> 他のWebページからの遷移なので、その遷移の番号を調べて$this->transProcNumberにセット
+		if(array_key_exists("pepk", $_GET)) {
+			$tm = new TransitionManager();
+
+			$pePrimKey = $_GET["pepk"];
+			$transProcNumber = $tm->getTransNumberByTriggerPePrimKey($pePrimKey);
+			$this->transProcNumber = $transProcNumber;
+		}
+		// GETリクエスト"pepk"がない場合 -> いきなりこのWebページに来たと判断し、$this->transProcNumberはNULLとする
+		else {
+			$this->transProcNumber = null;
+		}
+	}
+
+
+
+
+
+	/*
+	 * SUMMARY :
+	 * 遷移プロセスを実行後、WebページのHTMLを生成し返却する
+	 * 
+	 * NOTICE :
+	 * 既にcheckTransition()が実行されて$this->transProcNumberに遷移プロセス番号ないしnullが設定されているという前提がある
+	 */
+	public function generate() {
+		logg_debug_call(__FUNCTION__, "PageHtmlGenerator");
+
+		// このページにログインフォームが１つでも存在し、かつログインフォームからのリクエストがある（ログインアクセスしている）ならば認証を行う
+		// ここでログインに成功すると定められたページへ飛ぶ
+		$this->authenticateIfTried();
+
+		$clientInfo = new ClientInfo();
+
+		// ページエレメント数取得
+		$query = 'select * from page_element where pageNumber=' . $this->pageNumber . ' order by peNumber ASC';
+		$result = mysql_query_logg($query);
+		$pageElementNum = mysql_num_rows($result);
+		logg_debug("Webページのページエレメント数 : ".$pageElementNum, get_class($this), __FUNCTION__);
+
+		
+		// 直接このWebページへアクセス -> 何もしない
+		if($this->transProcNumber===null) {
+		}
+		// 他のWebページからの遷移 -> 遷移プロセス実行
+		else {
+			$tpe = new TransitionProcessExecuter($this->transProcNumber);
+			
+			// 遷移プロセスを実行（この遷移プロセスは現在のWebページに来るための遷移プロセスであり、リフレクション等を行うのでtrueを渡す）
+			$tpe->execute(true);
+		}
+
+
+		// 出力するHTML（これから作る）	
+		$html =	"<html>\n" .
+				"<head>\n" .
+				"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=Shift_JIS\">\n" .
+				"</head>\n" .
+				"<body>\n" .
+				"<form method=\"post\" name=\"PageElementsData\" enctype=\"multipart/form-data\">\n";
+
+		$transitionManager = new TransitionManager();
+		$transAuthManager = new TransitionAuthorityManager();
+
+		// 各 Page Element の HTML を作成
+		for($i=0; $i<$pageElementNum; $i++) {
+			$kind = mysql_result($result, $i, "peKind");
+			$pePrimaryKey = mysql_result($result, $i, PRIMARY_KEY);
+	
+			logg_debug("1126:".$i."個目（０始まり）のページエレメントの種類は「".$kind."」です。", "PageHtmlGenerator", __FUNCTION__);
+
+
+			// このページエレメントを「出力しなかった」か否か（遷移権限の関係で出力しない場合がある）
+			$notDisplayedThisPe = false;
+
+
+			// Table Display のHTML
+			if($kind==='Table Display') {
+				logg_debug("1126:ページエレメント「Table Display」を見つけました　HTMLを生成します", "PageHtmlGenerator", __FUNCTION__);
+
+				// 表示するDDTの番号を取得
+				$querySel = "select * from page_element_table_display where pePrimaryKey=" . $pePrimaryKey;
+				$resultSel = mysql_query_logg($querySel);
+				oneResultCheck($resultSel, "PageHtmlGenerator", __FUNCTION__);
+				$tblNumber = mysql_result($resultSel, 0, 'tblNumber');
+
+				// テーブル全体をTFDへ変換
+				$tfd = DdtTfdConverter::convDdtToTfdForTableDisplay($tblNumber);
+
+				// フィールド限定されている（つまり表示する）DDFのオフセットを調べ、配列にする
+				$queryFldRist = "select * from page_element_table_display_field "
+								. "where pePrimKey=".$pePrimaryKey
+								. " order by offset asc";
+				$resultFldRist = mysql_query_logg($queryFldRist);
+				$offsetArray = array();
+				for($rowOrd=0; $rowOrd<mysql_num_rows($resultFldRist); $rowOrd++) {
+					$offsetArray[$rowOrd] = mysql_result($resultFldRist, $rowOrd, "offset");
+				}
+
+				debug_varDump(__FUNCTION__, "1126:\$tfd", $tfd);
+
+				// TFDをHTMLテーブルに変換（フィールド限定されているDDFの分だけのHTMLテーブル）
+				$rfc = new TfdHtmlCreator($tfd, $clientInfo);
+				$rfc->setOffsetArray($offsetArray);
+				$tableHtml = $rfc->makeTableHtml();
+
+				$html .= $tableHtml;
+			}
+			// Createフォーム
+			else if($kind==='Create Form') {
+				logg_debug("ページエレメント「Create Form」を見つけました　HTMLを生成します", "PageHtmlGenerator", __FUNCTION__);
+
+				// Createフォームの遷移先ページの番号を取得
+				$queryDpn = "select * from transition where pePrimaryKey=" . $pePrimaryKey;
+				$resultDpn = mysql_query_logg($queryDpn);
+				oneResultCheck($resultDpn, "PageHtmlGenerator", __FUNCTION__);
+				$destPageNumber = mysql_result($resultDpn, 0, "tepNumber");
+
+				/*
+				 * ◆Createフォームで入力するDDFを限定できる（残りのDDFは自動でNULLにする）ようにするかもしれない
+				 */
+
+				// CreationFormMakerインスタンス作成
+				$cfm = new CreationFormMaker($clientInfo, $pePrimaryKey);
+
+				// 生成させたHTMLを付加
+				$html .= $cfm->makeCreateFormHtml();
+			}
+			// Updateフォーム HTML
+			else if($kind==='Update Form') {
+				logg_debug("1126:ページエレメント「Update Form」を見つけました　HTMLを生成します", "PageHtmlGenerator", __FUNCTION__);
+
+				// Updateフォームの遷移先ページの番号を取得
+				$queryDpn = "select * from transition where pePrimaryKey=" . $pePrimaryKey;
+				$resultDpn = mysql_query_logg($queryDpn);
+				oneResultCheck($resultDpn, "PageHtmlGenerator", __FUNCTION__);
+				$destPageNumber = mysql_result($resultDpn, 0, "tepNumber");
+
+				// フィールド限定されている（つまり更新フォームを表示する）DDFのオフセットを調べ、配列にする
+				$queryFldRist = "select * from page_element_update_form_field "
+								. "where pePrimKey=".$pePrimaryKey
+								. " order by offset asc";
+				$resultFldRist = mysql_query_logg($queryFldRist);
+				$offsetArray = array();
+				for($rowOrd=0; $rowOrd<mysql_num_rows($resultFldRist); $rowOrd++) {
+					$offsetArray[$rowOrd] = mysql_result($resultFldRist, $rowOrd, "offset");
+				}
+
+				// UpdateFormGeneratorインスタンス作成
+				$ufg = new UpdateFormGenerator($clientInfo, $pePrimaryKey, $destPageNumber, $offsetArray);
+
+				// 生成させたHTMLを付加
+				$html .= $ufg->generateTableHtml();
+			}
+			// 結果表示領域 HTML
+			else if($kind==='Display Area') {
+				logg_debug("1126:ページエレメント「Display Area」を見つけました　HTMLを生成します", "PageHtmlGenerator", __FUNCTION__);
+
+				// TPPN 取得
+				$query_checkTppn = 'select ' . TBL_PEDA_TPPN . ' from ' . TBL_PEDA
+				                . ' where ' . TBL_PEDA_PEPRIMKEY . '=' . $pePrimaryKey;
+				$result_checkTppn = mysql_query_logg($query_checkTppn);
+				$tppn = mysql_result($result_checkTppn, 0, 0);
+	
+				// TPP結果バッファから、このDisplay Areaで表示するべきTFDを取得
+				// （このDisplay Areaに対応したTPPNが page_element_daテーブルに記録されているが、それが$tppnに入っている。
+				//  これをTPP結果バッファのキーとして指定すれば、値としてそのTPPNの実行結果であるTFDが返ってくるはずである）
+				$tabularFormData = $tpe->getTppResult($tppn);
+	
+				debug_varDump(__FUNCTION__, "1126:\$tabularFormData", $tabularFormData);
+
+				$rfc = new TfdHtmlCreator($tabularFormData, $clientInfo);
+				$rfc->authReflect = false;
+				$html .= $rfc->makeTableHtml();
+			}
+			// サービス引数フォーム HTML
+			else if($kind=='Service Argument Form') {
+				// このサービス引数フォームのタイプを調べる
+				$query_checkSafType = "select * from page_element_saf where pePrimaryKey=".$pePrimaryKey;
+				$result_checkSafType = mysql_query($query_checkSafType);
+				oneResultCheck($result_checkSafType, get_class($this), __FUNCTION__);
+				$safType = mysql_result($result_checkSafType, 0, "kind");
+
+				// サービス引数フォームの名前を出力
+				$safName = mysql_result($result_checkSafType, 0, "safName");
+				$html .= $safName."<br><br>";
+
+				/*
+				 * サービス引数フォームの種類によって場合分け
+				 */
+				// DATE型
+				if($safType==="date") {
+					$html .= $this->getDateSafHtml($pePrimaryKey);
+				}
+			}
+			// ログインフォーム HTML
+			else if($kind=='Login Form') {
+				logg_debug("1126:ページエレメント「Login Form」を見つけました　HTMLを生成します", "PageHtmlGenerator", __FUNCTION__);
+
+				$queryLf = "select * from page_element_login_form where pePrimaryKey=" . $pePrimaryKey;
+				$resultLf = mysql_query_logg($queryLf);
+				oneResultCheck($resultLf, "PageHtmlGenerator", __FUNCTION__);
+
+				$accountTableNumber = mysql_result($resultLf, 0, "accountTableNumber");
+				$loginManager = new LoginManager();
+				$filePathManager = new FilePathManager();
+
+				// ログインフォームのactionURLは、「本インスタンスがこれからHTMLを生成してやるWebページのファイル名」なので注意（つまり一度同じページに行く）
+				$loginFormHtml = $loginManager->makeLoginFormHtml($accountTableNumber, $filePathManager->getPageFileName($this->pageNumber), $pePrimaryKey);
+
+				$html .= $loginFormHtml;
+			}
+			// テキスト
+			else if($kind=='Text') {
+				logg_debug("1126:ページエレメント「Text」を見つけました　HTMLを生成します", "PageHtmlGenerator", __FUNCTION__);
+
+				$textHtmlCreater = new TextHtmlCreater($pePrimaryKey);
+				$html .= $textHtmlCreater->generate();
+			}
+			// ハイパーリンク
+			else if($kind=='Hyper Link') {
+				logg_debug("1126:ページエレメント「Hyper Link」を見つけました　HTMLを生成します", "PageHtmlGenerator", __FUNCTION__);
+
+				$hyperLinkTransAuth = $transAuthManager->getTransAuthByClientInfoAndTrggerPePrimKey($clientInfo, $pePrimaryKey);
+
+				// このハイパーリンクによる遷移の権限あり
+				if($hyperLinkTransAuth===1) {
+					$hlHtmlCreater = new HyperLinkHtmlCreater($pePrimaryKey);
+					$html .= $hlHtmlCreater->generate();
+				}
+				// このハイパーリンクによる遷移の権限なし
+				else if($hyperLinkTransAuth===0) {
+					// 何も書かない
+					$notDisplayedThisPe = true;
+				}
+				// エラー
+				else {
+					logg_debug_error("想定外の値が返りました。", get_class($this), __FUNCTION__);
+					return null;
+				}
+			}
+
+			// ページエレメントを出力した -> 空行出力
+			if($notDisplayedThisPe===false) {
+				$html .= "\n<br>\n<br>\n<br>\n<br>\n";
+			}
+		}
+
+		$html .= "</form>\n";
+		
+		$html .= "<br>\n<br>\n";
+
+
+		// ゲストロールではない場合（ログインしている場合）、「～としてログイン中です。」というテキストとログアウトボタンを設置
+		if(!$clientInfo->isGuest()) {
+			$clientRoleName = $clientInfo->getRoleInfo()->name;
+			$html .= $clientRoleName . "としてログイン中です。<br>\n";
+
+			$logoutManager = new LogoutManager();
+			$logoutDestPageName = $logoutManager->getLogoutDestPageName();
+			$javaScriptCode = "location.href = \"" . $logoutDestPageName . "?executeLogout=1\";";
+			$html .= "<input type='button' value='ログアウト' onClick='" . $javaScriptCode . "'>\n";
+		}
+	
+		
+		$html .=	"</body>\n" .
+					"</html>";
+		
+	
+		logg_debug_return(__FUNCTION__, "PageHtmlGenerator");
+		return $html;
+	}
+
+
+
+
+
+	/*
+	 * SUMMARY :
+	 * ページに存在する全てのログインフォームに対し、「ログインアクセス中であればログイン認証を行い、成功したらジャンプする」という処理を行う
+	 */
+	public function authenticateIfTried() {
+		logg_debug_call(__FUNCTION__, "PageHtmlGenerator");
+
+		// このページにログインフォームが１つでも存在するかチェック、するならその全てについてログイン認証の処理を行う
+		// 正確には、ログインアクセスしていないかチェックし、そうならば認証を行う（違うなら何もしない）
+		$loginManager = new LoginManager();
+		$loginFormPeNumberArray = $this->checkPeTypeBeing("Login Form");
+		for($i=0; $i<count($loginFormPeNumberArray); $i++) {
+			// このログインフォームの、ページエレメント番号（主キーではない）
+			$loginFormPeNumber = $loginFormPeNumberArray[$i];
+
+			$queryJoin = "select page_element_login_form.accountTableNumber,page_element_login_form.destPageNumber"
+							. " from page_element join page_element_login_form"
+							. " where page_element.primaryKey=page_element_login_form.pePrimaryKey"
+							. " and page_element.pageNumber=" . $this->pageNumber
+							. " and page_element.peNumber=" . $loginFormPeNumber;
+			$resultJoin = mysql_query_logg($queryJoin);
+			oneResultCheck($resultJoin, "PageHtmlGenerator", __FUNCTION__);
+			
+			// 何番アカウントテーブルのログインフォームか
+			$accountTableNumber = mysql_result($resultJoin, 0, "accountTableNumber");
+
+			// ログイン成功時遷移先ページの番号・ファイル名
+			$destPageNumber = mysql_result($resultJoin, 0, "destPageNumber");
+			$fpm = new FilePathManager();
+			$destPageFileName = $fpm->getPageFileName($destPageNumber);
+
+			// ログインアクセス中ならば、ログイン認証を実行する
+			// 成功した場合、$destPageFileNameまでジャンプする
+			$loginManager->authenticateIfTried($accountTableNumber, $destPageFileName);
+		}
+
+		logg_debug_return(__FUNCTION__, "PageHtmlGenerator");
+	}
+
+
+
+
+
+	/*
+	 * SUMMARY :
+	 * 指定した種類のページエレメントが存在するかチェックし、それらページエレメントの（ページ内での）番号を配列で返す
+	 * 存在しなかった場合は空の配列を返す
+	 * 
+	 * NOTICE :
+	 * $peTypeの値・・・page_elementテーブルのkindフィールドに格納できる値（Display Area, Login Form ...)
+	 */
+	public function checkPeTypeBeing($peType) {
+		logg_debug_call(__FUNCTION__, "PageHtmlGenerator");
+
+		// ページエレメント数取得
+		$query = 'select * from page_element where pageNumber=' . $this->pageNumber . ' order by peNumber ASC';
+		$result = mysql_query_logg($query);
+		$pageElementNum = mysql_num_rows($result);
+
+		$peNumberArray = array();
+		for($i=0; $i<$pageElementNum; $i++) {
+			$kind = mysql_result($result, $i, "peKind");
+			if($kind===$peType) {
+				array_push($peNumberArray, $i);
+			}
+		}
+
+		logg_debug($this->pageNumber . "番のWebページは、ページエレメント'" . $peType . "'を" . count($peNumberArray) . "個含みます。", "PageHtmlGenerator", __FUNCTION__);
+
+		logg_debug_return(__FUNCTION__, "PageHtmlGenerator");
+		return $peNumberArray;
+	}
+
+
+
+
+
+	public function getDateSafHtml($pePrimaryKey) {
+		$html =	"<select name='" . $this->getDateSafRequestName($pePrimaryKey) . "'>\n";
+
+		// YEAR
+		$currentDate = date("Y");
+		for($i=1900; $i<=2100; $i++) {
+			$html .= "<option value='" . $i . "'";
+			if($i==$currentDate) {
+				$html .= " selected";
+			}
+			$html .= ">" . $i . "\n";
+		}
+
+		$html .= "</select>";
+
+		return $html;
+	}
+	public function getDateSafRequestName($pePrimaryKey) {
+		return "saf_date_".$pePrimaryKey;
+	}
+}
+?>

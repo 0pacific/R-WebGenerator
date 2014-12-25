@@ -1,0 +1,18 @@
+◆仕様メモ
+	全WebページのプログラムはR-Web直下にあり、どんなファイルのどんな関数もそこへ読み込まれ実行されると考えているため
+
+◆実装
+	・もしこんなだったら・・・というエラー処理は必ず書くこと（急がば回れ）
+		・エラー出力には 	error_logg_debug() を
+
+	・logg_debug_call(), logg_debug_return() は必ず記述
+
+	・mysql_query_logg()を使うこと
+
+
+◆デバッグ
+	・debug_varDump($funcName, $varName, $var)を活用すること
+
+
+◆データベース
+	・主キー名は必ず"primaryKey"を用いる
