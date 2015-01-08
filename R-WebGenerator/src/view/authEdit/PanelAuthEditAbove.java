@@ -436,6 +436,8 @@ public class PanelAuthEditAbove extends JPanel implements ActionListener,Seriali
 		// for文の中でローカルに定義されたコンポーネントなど、後で参照できなくなるコンポーネントをSpringLayoutの基準に用いたいとき、これに格納しておいて参照する
 		Component barometerComp = null;
 		
+		
+		
 		// テキストペイン
 		JTextPane textPaneMessage = new JTextPane();
 		String msg1 = japanese ?
@@ -507,6 +509,7 @@ public class PanelAuthEditAbove extends JPanel implements ActionListener,Seriali
 		// テキストペイン（Read, Write, ExWrite）
 		JTextPane textPaneFieldAuth = new JTextPane();
 		textPaneFieldAuth.setText(japanese ? "1-3.各フィールドに対する権限" : "1-3.Accessibility to each field");
+		textPaneFieldAuth.setEnabled(false);
 		Slpc.put(springLayout, "N", textPaneFieldAuth, "S", deleteCb, 20);
 		Slpc.put(springLayout, "W", textPaneFieldAuth, "W", this, PADDING_LEFT);
 		add(textPaneFieldAuth);

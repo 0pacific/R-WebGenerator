@@ -7,6 +7,8 @@ array() 空の配列の作成
 ia individual authority 個人権限
 ra roll authrity ルール権限
 
+Slpc.put = SerealizableSpringLayout.putConstraint(コンポーネントの配置）
+
 Application Remake Button (ARButton) アプリ再編集ボタン
 
 
