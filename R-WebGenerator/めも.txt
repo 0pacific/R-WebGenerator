@@ -64,3 +64,6 @@ file_put_contents("sample.txt", "ファイルへの書き込みサンプル");
 AppRemakeButtonを配置するページを選択するボタンを追加
 WebPage定義画面にのみAdminAuthへの遷移ボタンを定義ー＞この先やること
 
+AdminAuth編集画面を作成中
+IDPassパネル、AdminAuthEditAboveパネルに、すでに選択済みの部分を反映させること
+

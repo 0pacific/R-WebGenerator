@@ -1,5 +1,6 @@
 /generatedFiles
 /.DS_Store
+/account
 /authority
 /debug
 /executer
@@ -15,4 +16,4 @@
 /view
 /webPage
 /utility
-/account
+/adminAuth

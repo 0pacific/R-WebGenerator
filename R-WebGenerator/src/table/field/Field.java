@@ -16,6 +16,9 @@ public class Field implements Serializable {
 
 	public SuperTable table;
 	
+	public boolean adminEditable;//【追加】管理者が変更できるかどうか（trueで変更可。デフォルトはfalse）
+	
+	
 	// DB中のテーブル"field_info"の"dataType"カラムに入るべき値にすること
 	public static final String DATATYPE_INT = "int";
 	public static final String DATATYPE_VARCHAR = "varchar";
@@ -40,6 +43,7 @@ public class Field implements Serializable {
 	public Field(String name, String dataType) {
 		this.name = name;
 		this.dataType = dataType;
+		this.adminEditable = false;
 	}
 
 	
@@ -55,6 +59,7 @@ public class Field implements Serializable {
 		this.dataType = dataType;
 		this.min = min;
 		this.max = max;
+		this.adminEditable = false;
 	}
 
 	
@@ -135,5 +140,17 @@ public class Field implements Serializable {
 
 	public boolean isVarcharField() {
 		return (dataType==Field.DATATYPE_VARCHAR);
+	}
+	
+	public void setAdminEditable(){
+		this.adminEditable = true;
+	}
+	
+	public void setAdminNotEditable(){
+		this.adminEditable = false;
+	}
+	
+	public boolean getAdminEditable(){
+		return this.adminEditable;
 	}
 }
