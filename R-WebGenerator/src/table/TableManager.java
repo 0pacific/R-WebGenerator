@@ -3,11 +3,11 @@ package table;
 import authority.AuthorityManager;
 import gui.*;
 import gui.arrow.*;
-
 import role.NormalRole;
 import role.Role;
 import role.RoleManager;
 import table.*;
+import table.field.AbstractField;
 import table.field.Field;
 import tpp.*;
 import view.transProcEdit.serviceArgsWindow.*;
@@ -16,7 +16,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import pageElement.PageElementObserver;
-
 import debug.Debug;
 
 /*
@@ -107,6 +106,9 @@ public class TableManager implements Serializable {
 		AuthorityManager.getInstance().informFieldAddition(newField);
 	}
 	
+	public void informAbFieldAddition(AbstractField newAbField){
+		AuthorityManager.getInstance().informAbFieldAddition(newAbField);
+	}
 	
 	
 

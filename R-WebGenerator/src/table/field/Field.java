@@ -18,6 +18,8 @@ public class Field implements Serializable {
 	
 	public boolean adminEditable;//【追加】管理者が変更できるかどうか（trueで変更可。デフォルトはfalse）
 	
+	public boolean isFixed;//【追加】固定フィールドか抽象フィールドか（trueで固定、falseで抽象)
+	
 	
 	// DB中のテーブル"field_info"の"dataType"カラムに入るべき値にすること
 	public static final String DATATYPE_INT = "int";
@@ -44,6 +46,13 @@ public class Field implements Serializable {
 		this.name = name;
 		this.dataType = dataType;
 		this.adminEditable = false;
+	}	
+	
+	public Field(String name, String dataType,boolean isFixed) {
+		this.name = name;
+		this.dataType = dataType;
+		this.adminEditable = false;
+		this.isFixed = isFixed;
 	}
 
 	
@@ -60,6 +69,19 @@ public class Field implements Serializable {
 		this.min = min;
 		this.max = max;
 		this.adminEditable = false;
+		this.isFixed = true;
+	}
+	
+	
+	//【追加】（仮）
+	public Field(String name,String dataType ,int min ,int max ,boolean isFixed){
+
+		this.name = name;
+		this.dataType = dataType;
+		this.min = min;
+		this.max = max;
+		this.adminEditable = false;
+		this.isFixed = isFixed;
 	}
 
 	

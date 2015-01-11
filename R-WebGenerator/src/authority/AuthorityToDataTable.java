@@ -19,6 +19,7 @@ import mainFrame.*;
 import pageElement.*;
 import role.*;
 import table.*;
+import table.field.AbstractField;
 import table.field.Field;
 import test.Tester;
 import tpp.*;
@@ -66,6 +67,12 @@ public class AuthorityToDataTable extends AuthorityToTable implements Serializab
 
 	public void informFieldAddition(Field newField) {
 		authSet.informFieldAddition(newField);
+	}
+	
+	
+	
+	public void informAbFieldAddition(AbstractField newField) {
+		informFieldAddition(newField);
 	}
 
 

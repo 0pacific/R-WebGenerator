@@ -10,6 +10,7 @@ import debug.Debug;
 import role.Role;
 import role.RoleManager;
 import table.*;
+import table.field.AbstractField;
 import table.field.Field;
 
 public abstract class AuthorityToTable implements Serializable {
@@ -42,6 +43,7 @@ public abstract class AuthorityToTable implements Serializable {
 
 
 	public abstract void informFieldAddition(Field field);
+	public abstract void informAbFieldAddition(AbstractField field);
 	public abstract void informIaAddition(Role role);
 	public abstract void informIaDeletion(Role role);
 }

@@ -9,22 +9,21 @@ import java.awt.TextField;
 import java.awt.event.*;
 import java.io.Serializable;
 
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SpringLayout;
 
 import property.GeneratorProperty;
-
 import mainFrame.MainFrame;
-
 import debug.Debug;
-
 import table.*;
 import table.field.Field;
 import utility.Slpc;
@@ -69,6 +68,12 @@ public class FieldEditPanel extends JPanel implements ItemListener,ActionListene
 	// ファイル最大KB
 	public JTextPane textPaneFileSizeMaxKb = new JTextPane();
 	public JTextField textFieldFileSizeMaxKb = new JTextField();
+	
+	//固定フィールドか抽象フィールドかの選択用ラジオボタン【追加】
+	public JRadioButton radioFixedField;
+	public JRadioButton radioAbstractField;
+	public ButtonGroup fieldGroup;
+	
 	
 	// 追加実行ボタン
 	public JButton btnAdd;
@@ -149,6 +154,17 @@ public class FieldEditPanel extends JPanel implements ItemListener,ActionListene
 		textPaneDataTypeSelect.setEditable(false);
 		comboBoxDataTypeSelect = new JComboBox();
 		comboBoxDataTypeSelect.addItemListener(this);
+		
+		//固定フィールドか抽象フィールドか選択
+		radioFixedField = new JRadioButton(japanese? "固定フィールド" : "Fixed Field");
+		radioFixedField.addActionListener(this);
+		radioFixedField.setActionCommand("固定フィールド");
+		radioAbstractField = new JRadioButton(japanese? "抽象フィールド":"Abstract Field");
+		radioAbstractField.addActionListener(this);
+		radioAbstractField.setActionCommand("抽象フィールド");
+		fieldGroup = new ButtonGroup();
+		fieldGroup.add(radioFixedField);
+		fieldGroup.add(radioAbstractField);
 		
 		btnAdd = new JButton(japanese ? "フィールドを追加" : "Add Field");
 		btnAdd.addActionListener(this);
@@ -855,9 +871,20 @@ public class FieldEditPanel extends JPanel implements ItemListener,ActionListene
 	 * 追加実行ボタン（or編集実行ボタン）とキャンセルボタンを配置する
 	 */
 	public void locateButtons(Component balometerComp) {
+		
 		// 追加モード
 		if(modeAddEdit==FieldEditPanel.MODE_ADD) {
-			springLayout.putConstraint(SpringLayout.NORTH, btnAdd, 20, SpringLayout.SOUTH, balometerComp);
+			
+			radioFixedField.setSelected(true);
+			springLayout.putConstraint(SpringLayout.NORTH, radioFixedField, 20, SpringLayout.SOUTH, balometerComp);
+			springLayout.putConstraint(SpringLayout.WEST, radioFixedField, 20, SpringLayout.WEST, this);
+			add(btnAdd);
+			
+			springLayout.putConstraint(SpringLayout.NORTH, radioAbstractField, 0, SpringLayout.NORTH, radioFixedField);
+			springLayout.putConstraint(SpringLayout.EAST, radioAbstractField, 20, SpringLayout.WEST, radioFixedField);
+			add(btnAdd);
+			
+			springLayout.putConstraint(SpringLayout.NORTH, btnAdd, 20, SpringLayout.SOUTH, radioFixedField);
 			springLayout.putConstraint(SpringLayout.WEST, btnAdd, 20, SpringLayout.WEST, this);
 			add(btnAdd);
 
@@ -868,7 +895,17 @@ public class FieldEditPanel extends JPanel implements ItemListener,ActionListene
 		}
 		// 編集モード
 		else {
-			springLayout.putConstraint(SpringLayout.NORTH, btnEdit, 20, SpringLayout.SOUTH, balometerComp);
+			if(editingField.isFixed==true)radioFixedField.setSelected(true);
+			else radioAbstractField.setSelected(true);
+			springLayout.putConstraint(SpringLayout.NORTH, radioFixedField, 20, SpringLayout.SOUTH, balometerComp);
+			springLayout.putConstraint(SpringLayout.WEST, radioFixedField, 20, SpringLayout.WEST, this);
+			add(btnAdd);
+			
+			springLayout.putConstraint(SpringLayout.NORTH, radioAbstractField, 0, SpringLayout.NORTH, radioFixedField);
+			springLayout.putConstraint(SpringLayout.EAST, radioAbstractField, 20, SpringLayout.WEST, radioFixedField);
+			add(btnAdd);
+			
+			springLayout.putConstraint(SpringLayout.NORTH, btnEdit, 20, SpringLayout.SOUTH, radioFixedField);
 			springLayout.putConstraint(SpringLayout.WEST, btnEdit, 20, SpringLayout.WEST, this);
 			add(btnEdit);
 
@@ -973,40 +1010,47 @@ public class FieldEditPanel extends JPanel implements ItemListener,ActionListene
 				return;
 			}
 
+			boolean isFixed = true;
+			if(radioFixedField.isSelected()) isFixed = true;
+			else if(radioAbstractField.isSelected()) isFixed = false;
+			else{
+				Debug.error("フィールドの追加を実行しようとしましたが、想定外のタイプです。", getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName());
+				return;
+			}
 			
 			if(currentDataType.equals(Field.DATATYPE_INT)) {
 				int min = Integer.parseInt(tfMin.getText());
 				int max = Integer.parseInt(tfMax.getText());
-				newField = new Field(name, Field.DATATYPE_INT, min, max);
+				newField = new Field(name, Field.DATATYPE_INT, min, max,isFixed);
 			}
 			else if(currentDataType.equals(Field.DATATYPE_VARCHAR)) {
 				int min = Integer.parseInt(tfMin.getText());
 				int max = Integer.parseInt(tfMax.getText());
-				newField = new Field(name, Field.DATATYPE_VARCHAR, min, max);
+				newField = new Field(name, Field.DATATYPE_VARCHAR, min, max,isFixed);
 			}
 			else if(currentDataType.equals(Field.DATATYPE_TEXT)) {
 				int min = Integer.parseInt(tfMin.getText());
 				int max = Integer.parseInt(tfMax.getText());
-				newField = new Field(name, Field.DATATYPE_TEXT, min, max);
+				newField = new Field(name, Field.DATATYPE_TEXT, min, max,isFixed);
 			}
 			else if(currentDataType.equals(Field.DATATYPE_DATETIME)) {
-				newField = new Field(name, Field.DATATYPE_DATETIME);
+				newField = new Field(name, Field.DATATYPE_DATETIME,isFixed);
 			}
 			else if(currentDataType.equals(Field.DATATYPE_DATE)) {
-				newField = new Field(name, Field.DATATYPE_DATE);
+				newField = new Field(name, Field.DATATYPE_DATE,isFixed);
 			}
 			else if(currentDataType.equals(Field.DATATYPE_TIME)) {
-				newField = new Field(name, Field.DATATYPE_TIME);
+				newField = new Field(name, Field.DATATYPE_TIME,isFixed);
 			}
 			else if(currentDataType.equals(Field.DATATYPE_MAIL)) {
-				newField = new Field(name, Field.DATATYPE_MAIL, 0, 0);
+				newField = new Field(name, Field.DATATYPE_MAIL, 0, 0,isFixed);
 			}
 			else if(currentDataType.equals(Field.DATATYPE_FILE)) {
 				int fileSizeMaxKb = Integer.parseInt(this.textFieldFileSizeMaxKb.getText());
-				newField = new Field(name, Field.DATATYPE_FILE, 0, fileSizeMaxKb);
+				newField = new Field(name, Field.DATATYPE_FILE, 0, fileSizeMaxKb,isFixed);
 			}
 			else if(currentDataType.equals(Field.DATATYPE_ROLE_NAME)) {
-				newField = new Field(name, Field.DATATYPE_ROLE_NAME);
+				newField = new Field(name, Field.DATATYPE_ROLE_NAME,isFixed);
 			}
 			else {
 				Debug.error("フィールドの追加を実行しようとしましたが、想定外のデータ型です。", getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName());
@@ -1024,64 +1068,81 @@ public class FieldEditPanel extends JPanel implements ItemListener,ActionListene
 			editingField.name = newName;
 			
 
+			boolean isFixed = true;
+			if(radioFixedField.isSelected()) isFixed = true;
+			else if(radioAbstractField.isSelected()) isFixed = false;
+			
+
 			// INT
 			if(currentDataType.equals(Field.DATATYPE_INT)) {
 				editingField.dataType = Field.DATATYPE_INT;
 				editingField.min = Integer.parseInt(tfMin.getText());
 				editingField.max = Integer.parseInt(tfMax.getText());
+				editingField.isFixed = isFixed;
 			}
 			// VARCHAR
 			else if(currentDataType.equals(Field.DATATYPE_VARCHAR)) {
 				editingField.dataType = Field.DATATYPE_VARCHAR;
 				editingField.min = Integer.parseInt(tfMin.getText());
 				editingField.max = Integer.parseInt(tfMax.getText());
+				editingField.isFixed = isFixed;
 			}
 			// TEXT
 			else if(currentDataType.equals(Field.DATATYPE_TEXT)) {
 				editingField.dataType = Field.DATATYPE_TEXT;
 				editingField.min = Integer.parseInt(tfMin.getText());
 				editingField.max = Integer.parseInt(tfMax.getText());
+				editingField.isFixed = isFixed;
 			}
 			// DATETIME
 			else if(currentDataType.equals(Field.DATATYPE_DATETIME)) {
 				editingField.dataType = Field.DATATYPE_DATETIME;
+				editingField.isFixed = isFixed;
 			}
 			// DATE
 			else if(currentDataType.equals(Field.DATATYPE_DATE)) {
 				editingField.dataType = Field.DATATYPE_DATE;
+				editingField.isFixed = isFixed;
 			}
 			// TIME
 			else if(currentDataType.equals(Field.DATATYPE_TIME)) {
 				editingField.dataType = Field.DATATYPE_TIME;
+				editingField.isFixed = isFixed;
 			}
 			// FILE
 			else if(currentDataType.equals(Field.DATATYPE_FILE)) {
 				editingField.dataType = Field.DATATYPE_FILE;
 				editingField.max = Integer.parseInt(this.textFieldFileSizeMaxKb.getText());
+				editingField.isFixed = isFixed;
 			}
 			// MAIL
 			else if(currentDataType.equals(Field.DATATYPE_MAIL)) {
 				editingField.dataType = Field.DATATYPE_MAIL;
+				editingField.isFixed = isFixed;
 			}
 			// USERID
 			else if(currentDataType.equals(Field.DATATYPE_USERID)) {
 				editingField.dataType = Field.DATATYPE_USERID;
 				editingField.min = Integer.parseInt(tfMin.getText());
 				editingField.max = Integer.parseInt(tfMax.getText());
+				editingField.isFixed = isFixed;
 			}
 			// MAIL_AUTH
 			else if(currentDataType.equals(Field.DATATYPE_MAIL_AUTH)) {
 				editingField.dataType = Field.DATATYPE_MAIL_AUTH;
+				editingField.isFixed = isFixed;
 			}
 			// PASSWORD
 			else if(currentDataType.equals(Field.DATATYPE_PASSWORD)) {
 				editingField.dataType = Field.DATATYPE_PASSWORD;
 				editingField.min = Integer.parseInt(tfMin.getText());
 				editingField.max = Integer.parseInt(tfMax.getText());
+				editingField.isFixed = isFixed;
 			}
 			// ROLE_NAME
 			else if(currentDataType.equals(Field.DATATYPE_ROLE_NAME)) {
 				editingField.dataType = Field.DATATYPE_ROLE_NAME;
+				editingField.isFixed = isFixed;
 			}
 			else {
 				Debug.error("フィールドの編集を実行しようとしましたが、想定外のデータ型です。", getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName());

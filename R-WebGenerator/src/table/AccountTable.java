@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 import gui.*;
 import gui.arrow.*;
-
 import role.NormalRole;
 import role.Role;
 import table.*;
+import table.field.AbstractField;
 import table.field.Field;
 import tpp.*;
 import view.transProcEdit.serviceArgsWindow.*;
@@ -29,6 +29,12 @@ public class AccountTable extends SuperTable {
 		fieldArray.add(field);
 		field.setTable(this);
 		TableManager.getInstance().informFieldAddition(field);
+	}
+	
+	public void addAbField(AbstractField field) {
+		fieldArray.add(field);
+		field.setTable(this);
+		TableManager.getInstance().informAbFieldAddition(field);
 	}
 
 	public NormalRole getNormalRole(int index) {

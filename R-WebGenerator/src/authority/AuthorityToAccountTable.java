@@ -19,6 +19,7 @@ import mainFrame.*;
 import pageElement.*;
 import role.*;
 import table.*;
+import table.field.AbstractField;
 import table.field.Field;
 import test.Tester;
 import tpp.*;
@@ -97,6 +98,10 @@ public class AuthorityToAccountTable extends AuthorityToTable implements Seriali
 			AuthoritySet authSet = authSetHashMap.get(accountOwnerRole);
 			authSet.informFieldAddition(newField);
 		}
+	}
+	
+	public void informAbFieldAddition(AbstractField field){
+		informFieldAddition(field);
 	}
 
 

@@ -5,11 +5,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import debug.Debug;
-
 import role.NormalRole;
 import role.Role;
 import role.RoleManager;
 import table.*;
+import table.field.AbstractField;
 import table.field.Field;
 import transition.Transition;
 import transition.TransitionManager;
@@ -90,6 +90,19 @@ public class AuthorityManager implements Serializable {
 			}
 
 			authToTable.informFieldAddition(newField);
+		}
+	}
+	
+	public void informAbFieldAddition(AbstractField newField) {
+		SuperTable fieldAddedTable = newField.getTable();
+		
+		for(int i=0; i<tableAuthArray.size(); i++) {
+			AuthorityToTable authToTable = tableAuthArray.get(i);
+			if(authToTable.getTable()!=fieldAddedTable) {
+				continue;
+			}
+
+			authToTable.informAbFieldAddition(newField);
 		}
 	}
 	
