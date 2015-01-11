@@ -169,9 +169,15 @@ public class PanelPeEditRightSupporterUpdateForm implements ActionListener,Seria
 
 			// チェックボックス配列
 			checkBoxArrayFieldLimit = new ArrayList<JCheckBox>();
-			for(int i=0; i<table.getFieldNum(); i++) {
+			for(int i=0; i<table.getAllFieldNum(); i++) {
 				JCheckBox cb = new JCheckBox();
-				cb.setText(table.getField(i).getFieldName());
+				String fieldName = table.getAllField(i).getFieldName();
+
+				if(!table.getAllField(i).isFixed){
+					if(japanese)fieldName = fieldName + "（抽象）";
+					else fieldName = fieldName + "-Abstract-";
+				}
+				cb.setText(fieldName);
 
 				checkBoxArrayFieldLimit.add(cb);
 
@@ -312,7 +318,7 @@ public class PanelPeEditRightSupporterUpdateForm implements ActionListener,Seria
 			// フィールド限定のチェックボックスを見ていき、チェックされているフィールドのオフセットを集める
 			// 一度IntegerのArrayListを作り、後でint配列にする
 			ArrayList<Integer> offsetArrayList = new ArrayList<Integer>();
-			for(int i=0; i<table.getFieldNum(); i++) {
+			for(int i=0; i<table.getAllFieldNum(); i++) {
 				JCheckBox checkBox = this.checkBoxArrayFieldLimit.get(i);
 				if(checkBox.isSelected()) {
 					offsetArrayList.add(new Integer(i));

@@ -113,7 +113,8 @@ public class PanelTableListAbove extends JPanel implements Serializable {
 
 			// 項目「フィールド数」
 			int fieldNum = dataTable.getFieldNum();
-			dataTableListValues[i][1] = Integer.toString(fieldNum);
+			int abFieldNum = dataTable.getAllFieldNum() - fieldNum;
+			dataTableListValues[i][1] = Integer.toString(fieldNum) + "(" +Integer.toString(abFieldNum) + ")";
 		}
 		
 		// 新たなモデルをセット
@@ -149,7 +150,8 @@ public class PanelTableListAbove extends JPanel implements Serializable {
 			
 			// 項目「フィールド数」
 			int fieldNum = accountTable.getFieldNum();
-			accountTableListValues[i][1] = Integer.toString(fieldNum);
+			int abFieldNum = accountTable.getAllFieldNum() - fieldNum;
+			accountTableListValues[i][1] = Integer.toString(fieldNum) + "(" +Integer.toString(abFieldNum) + ")";
 
 			// アカウントテーブルに対応する各ロールの名前
 			int roleNum = accountTable.getNormalRoleNum();

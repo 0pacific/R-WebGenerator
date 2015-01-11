@@ -74,6 +74,8 @@ public class FieldEditPanel extends JPanel implements ItemListener,ActionListene
 	public JRadioButton radioAbstractField;
 	public ButtonGroup fieldGroup;
 	
+	//固定、抽象フィールドの説明
+	public JTextPane description;
 	
 	// 追加実行ボタン
 	public JButton btnAdd;
@@ -92,6 +94,9 @@ public class FieldEditPanel extends JPanel implements ItemListener,ActionListene
 
 	// 今、どのデータタイプの追加（または編集）フォームを表示しているか（Fieldクラスのstatic定数を代入）
 	public String currentDataType;
+	
+	private boolean isFixedPrev=true;
+	
 	
 	/*
 	 * インスタンス参照変数は最後！
@@ -165,6 +170,9 @@ public class FieldEditPanel extends JPanel implements ItemListener,ActionListene
 		fieldGroup = new ButtonGroup();
 		fieldGroup.add(radioFixedField);
 		fieldGroup.add(radioAbstractField);
+		
+		description = new JTextPane();
+		description.setText(japanese? "管理者に変更、削除されないフィールドです\n" : "Admin cannnot edit or delete this field\n");
 		
 		btnAdd = new JButton(japanese ? "フィールドを追加" : "Add Field");
 		btnAdd.addActionListener(this);
@@ -246,6 +254,7 @@ public class FieldEditPanel extends JPanel implements ItemListener,ActionListene
 
 		this.editingField = field;
 		
+		this.isFixedPrev = field.isFixed;
 		// 全コンポーネント除去
 		removeAllComps();
 		
@@ -871,6 +880,7 @@ public class FieldEditPanel extends JPanel implements ItemListener,ActionListene
 	 * 追加実行ボタン（or編集実行ボタン）とキャンセルボタンを配置する
 	 */
 	public void locateButtons(Component balometerComp) {
+		boolean japanese = GeneratorProperty.japanese();
 		
 		// 追加モード
 		if(modeAddEdit==FieldEditPanel.MODE_ADD) {
@@ -878,13 +888,17 @@ public class FieldEditPanel extends JPanel implements ItemListener,ActionListene
 			radioFixedField.setSelected(true);
 			springLayout.putConstraint(SpringLayout.NORTH, radioFixedField, 20, SpringLayout.SOUTH, balometerComp);
 			springLayout.putConstraint(SpringLayout.WEST, radioFixedField, 20, SpringLayout.WEST, this);
-			add(btnAdd);
+			add(radioFixedField);
 			
 			springLayout.putConstraint(SpringLayout.NORTH, radioAbstractField, 0, SpringLayout.NORTH, radioFixedField);
-			springLayout.putConstraint(SpringLayout.EAST, radioAbstractField, 20, SpringLayout.WEST, radioFixedField);
-			add(btnAdd);
+			springLayout.putConstraint(SpringLayout.WEST, radioAbstractField, 20, SpringLayout.EAST, radioFixedField);
+			add(radioAbstractField);
 			
-			springLayout.putConstraint(SpringLayout.NORTH, btnAdd, 20, SpringLayout.SOUTH, radioFixedField);
+			springLayout.putConstraint(SpringLayout.NORTH, description, 20, SpringLayout.SOUTH, radioFixedField);
+			springLayout.putConstraint(SpringLayout.WEST, description, 20, SpringLayout.WEST, this);
+			add(description);	
+			
+			springLayout.putConstraint(SpringLayout.NORTH, btnAdd, 20, SpringLayout.SOUTH, description);
 			springLayout.putConstraint(SpringLayout.WEST, btnAdd, 20, SpringLayout.WEST, this);
 			add(btnAdd);
 
@@ -896,15 +910,22 @@ public class FieldEditPanel extends JPanel implements ItemListener,ActionListene
 		// 編集モード
 		else {
 			if(editingField.isFixed==true)radioFixedField.setSelected(true);
-			else radioAbstractField.setSelected(true);
+			else{
+				description.setText(japanese? "管理者が複製できるフィールドです。\nこれ自体はアプリケーションに表示されません。" : "Admin can copy this field.\nAbstract Field is not visible in Web Application.");
+				radioAbstractField.setSelected(true);
+			}
+			
 			springLayout.putConstraint(SpringLayout.NORTH, radioFixedField, 20, SpringLayout.SOUTH, balometerComp);
 			springLayout.putConstraint(SpringLayout.WEST, radioFixedField, 20, SpringLayout.WEST, this);
-			add(btnAdd);
+			add(radioFixedField);
 			
 			springLayout.putConstraint(SpringLayout.NORTH, radioAbstractField, 0, SpringLayout.NORTH, radioFixedField);
-			springLayout.putConstraint(SpringLayout.EAST, radioAbstractField, 20, SpringLayout.WEST, radioFixedField);
-			add(btnAdd);
+			springLayout.putConstraint(SpringLayout.WEST, radioAbstractField, 20, SpringLayout.EAST, radioFixedField);
+			add(radioAbstractField);
 			
+			springLayout.putConstraint(SpringLayout.NORTH, description, 20, SpringLayout.SOUTH, radioFixedField);
+			springLayout.putConstraint(SpringLayout.WEST, description, 20, SpringLayout.WEST, this);
+			add(description);	
 			springLayout.putConstraint(SpringLayout.NORTH, btnEdit, 20, SpringLayout.SOUTH, radioFixedField);
 			springLayout.putConstraint(SpringLayout.WEST, btnEdit, 20, SpringLayout.WEST, this);
 			add(btnEdit);
@@ -1056,7 +1077,9 @@ public class FieldEditPanel extends JPanel implements ItemListener,ActionListene
 				Debug.error("フィールドの追加を実行しようとしましたが、想定外のデータ型です。", getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName());
 			}
 			SuperTable table = Panel_FieldList.getInstance().getTable();
-			table.addField(newField);
+			if(isFixed)table.addField(newField);//固定フィールド
+			table.addFieldAllArray(newField);
+			frameClosed();
 		}
 		else if(cmd.equals("フィールド編集")) {
 			// 入力されたフィールド名を新たなフィールド名に設定
@@ -1078,81 +1101,91 @@ public class FieldEditPanel extends JPanel implements ItemListener,ActionListene
 				editingField.dataType = Field.DATATYPE_INT;
 				editingField.min = Integer.parseInt(tfMin.getText());
 				editingField.max = Integer.parseInt(tfMax.getText());
-				editingField.isFixed = isFixed;
 			}
 			// VARCHAR
 			else if(currentDataType.equals(Field.DATATYPE_VARCHAR)) {
 				editingField.dataType = Field.DATATYPE_VARCHAR;
 				editingField.min = Integer.parseInt(tfMin.getText());
 				editingField.max = Integer.parseInt(tfMax.getText());
-				editingField.isFixed = isFixed;
 			}
 			// TEXT
 			else if(currentDataType.equals(Field.DATATYPE_TEXT)) {
 				editingField.dataType = Field.DATATYPE_TEXT;
 				editingField.min = Integer.parseInt(tfMin.getText());
 				editingField.max = Integer.parseInt(tfMax.getText());
-				editingField.isFixed = isFixed;
 			}
 			// DATETIME
 			else if(currentDataType.equals(Field.DATATYPE_DATETIME)) {
 				editingField.dataType = Field.DATATYPE_DATETIME;
-				editingField.isFixed = isFixed;
 			}
 			// DATE
 			else if(currentDataType.equals(Field.DATATYPE_DATE)) {
 				editingField.dataType = Field.DATATYPE_DATE;
-				editingField.isFixed = isFixed;
 			}
 			// TIME
 			else if(currentDataType.equals(Field.DATATYPE_TIME)) {
 				editingField.dataType = Field.DATATYPE_TIME;
-				editingField.isFixed = isFixed;
 			}
 			// FILE
 			else if(currentDataType.equals(Field.DATATYPE_FILE)) {
 				editingField.dataType = Field.DATATYPE_FILE;
 				editingField.max = Integer.parseInt(this.textFieldFileSizeMaxKb.getText());
-				editingField.isFixed = isFixed;
 			}
 			// MAIL
 			else if(currentDataType.equals(Field.DATATYPE_MAIL)) {
 				editingField.dataType = Field.DATATYPE_MAIL;
-				editingField.isFixed = isFixed;
 			}
 			// USERID
 			else if(currentDataType.equals(Field.DATATYPE_USERID)) {
 				editingField.dataType = Field.DATATYPE_USERID;
 				editingField.min = Integer.parseInt(tfMin.getText());
 				editingField.max = Integer.parseInt(tfMax.getText());
-				editingField.isFixed = isFixed;
 			}
 			// MAIL_AUTH
 			else if(currentDataType.equals(Field.DATATYPE_MAIL_AUTH)) {
 				editingField.dataType = Field.DATATYPE_MAIL_AUTH;
-				editingField.isFixed = isFixed;
 			}
 			// PASSWORD
 			else if(currentDataType.equals(Field.DATATYPE_PASSWORD)) {
 				editingField.dataType = Field.DATATYPE_PASSWORD;
 				editingField.min = Integer.parseInt(tfMin.getText());
 				editingField.max = Integer.parseInt(tfMax.getText());
-				editingField.isFixed = isFixed;
 			}
 			// ROLE_NAME
 			else if(currentDataType.equals(Field.DATATYPE_ROLE_NAME)) {
 				editingField.dataType = Field.DATATYPE_ROLE_NAME;
-				editingField.isFixed = isFixed;
 			}
 			else {
 				Debug.error("フィールドの編集を実行しようとしましたが、想定外のデータ型です。", getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName());
 			}
+			//固定、抽象が変化した場合、リストに追加/削除
+			if(isFixedPrev!=isFixed){
+				SuperTable table = editingField.getTable();
+				editingField.isFixed = isFixed;
+				if(isFixed){
+					//抽象→固定
+					table.addField(editingField);
+				}
+				else{
+					//固定→抽象
+					table.removeField(editingField);
+				}
+			}
+			
+			frameClosed();
+			
 		}
 		else if(cmd.equals("キャンセル")) {
 			// 何もしない
+			frameClosed();
+		}
+		else if(cmd.equals("固定フィールド")){
+			description.setText(japanese? "管理者に変更、削除されないフィールドです\n" : "Admin cannnot edit or delete this field\n");
+		}
+		else if(cmd.equals("抽象フィールド")){
+			description.setText(japanese? "管理者が複製できるフィールドです。\nこれ自体はアプリケーションに表示されません。" : "Admin can copy this field.\nAbstract Field is not visible in Web Application.");
 		}
 
-		frameClosed();
 	}
 
 	

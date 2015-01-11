@@ -53,8 +53,8 @@ public class AuthoritySet implements Serializable {
 
 		
 		// 対フィールド権限の初期化（Read, Write, ExWrite, とも、RA・IA問わず全フィールドに対しfalseとする）
-		for(int i=0; i<table.getFieldNum(); i++) {
-			Field field = table.getField(i);
+		for(int i=0; i<table.getAllFieldNum(); i++) {
+			Field field = table.getAllField(i);
 			raReadAuthHashMap.put(field, new Boolean(false));
 			raWriteAuthHashMap.put(field, new Boolean(false));
 			raExWriteAuthHashMap.put(field, new Boolean(false));
@@ -194,17 +194,17 @@ public class AuthoritySet implements Serializable {
 	
 	// 対フィールドRA権限ゲット
 	public boolean getRaRead(int offset) {
-		Field field = this.table.getField(offset);
+		Field field = this.table.getAllField(offset);
 		Boolean permission = raReadAuthHashMap.get(field);
 		return permission.booleanValue();
 	}
 	public boolean getRaWrite(int offset) {
-		Field field = this.table.getField(offset);
+		Field field = this.table.getAllField(offset);
 		Boolean permission = raWriteAuthHashMap.get(field);
 		return permission.booleanValue();
 	}
 	public boolean getRaExWrite(int offset) {
-		Field field = this.table.getField(offset);
+		Field field = this.table.getAllField(offset);
 		Boolean permission = raExWriteAuthHashMap.get(field);
 		return permission.booleanValue();
 	}
@@ -212,32 +212,32 @@ public class AuthoritySet implements Serializable {
 	
 	// 対フィールドRA権限セット
 	public void setRaRead(int offset, boolean auth) {
-		Field field = this.table.getField(offset);
+		Field field = this.table.getAllField(offset);
 		raReadAuthHashMap.put(field, new Boolean(auth));
 	}
 	public void setRaWrite(int offset, boolean auth) {
-		Field field = this.table.getField(offset);
+		Field field = this.table.getAllField(offset);
 		raWriteAuthHashMap.put(field, new Boolean(auth));
 	}
 	public void setRaExWrite(int offset, boolean auth) {
-		Field field = this.table.getField(offset);
+		Field field = this.table.getAllField(offset);
 		raExWriteAuthHashMap.put(field, new Boolean(auth));
 	}
 
 	
 	// 対フィールドIA権限ゲット
 	public boolean getIaRead(int offset) {
-		Field field = this.table.getField(offset);
+		Field field = this.table.getAllField(offset);
 		Boolean permission = iaReadAuthHashMap.get(field);
 		return permission.booleanValue();
 	}
 	public boolean getIaWrite(int offset) {
-		Field field = this.table.getField(offset);
+		Field field = this.table.getAllField(offset);
 		Boolean permission = iaWriteAuthHashMap.get(field);
 		return permission.booleanValue();
 	}
 	public boolean getIaExWrite(int offset) {
-		Field field = this.table.getField(offset);
+		Field field = this.table.getAllField(offset);
 		Boolean permission = iaExWriteAuthHashMap.get(field);
 		return permission.booleanValue();
 	}
@@ -245,15 +245,15 @@ public class AuthoritySet implements Serializable {
 	
 	// 対フィールドIA権限セット
 	public void setIaRead(int offset, boolean auth) {
-		Field field = this.table.getField(offset);
+		Field field = this.table.getAllField(offset);
 		iaReadAuthHashMap.put(field, new Boolean(auth));
 	}
 	public void setIaWrite(int offset, boolean auth) {
-		Field field = this.table.getField(offset);
+		Field field = this.table.getAllField(offset);
 		iaWriteAuthHashMap.put(field, new Boolean(auth));
 	}
 	public void setIaExWrite(int offset, boolean auth) {
-		Field field = this.table.getField(offset);
+		Field field = this.table.getAllField(offset);
 		iaExWriteAuthHashMap.put(field, new Boolean(auth));
 	}
 

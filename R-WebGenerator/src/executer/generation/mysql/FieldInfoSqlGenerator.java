@@ -39,6 +39,9 @@ public class FieldInfoSqlGenerator {
 			for(int j=0; j<dt.getFieldNum(); j++) {
 				Field field = dt.getField(j);
 				
+				//抽象フィールドは無視【追加】
+				if(!field.isFixed) continue;
+				
 				sql +=	"(" +
 				Integer.toString(tableNumber) + ", " +
 				Integer.toString(j) + ", " +
@@ -69,6 +72,9 @@ public class FieldInfoSqlGenerator {
 			// 各DDFについて処理
 			for(int j=0; j<at.getFieldNum(); j++) {
 				Field field = at.getField(j);
+				
+				//抽象フィールドは無視【追加】 おそらく不要だが・・・
+				if(!field.isFixed) continue;
 				
 				sql +=	"(" +
 				Integer.toString(tableNumber) + ", " +

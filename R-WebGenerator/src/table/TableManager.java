@@ -220,6 +220,25 @@ public class TableManager implements Serializable {
 		return null;
 	}
 	
+	//抽象フィールドも含む
+	public SuperTable getTableByFieldAllArray(Field field) {
+		for(int i=0; i<this.getDataTableNum(); i++) {
+			DataTable dt = getDataTable(i);
+			if(dt.containsThisFieldAll(field)) {
+				return dt;
+			}
+		}
+		for(int i=0; i<this.getAccountTableNum(); i++) {
+			AccountTable at = getAccountTable(i);
+			if(at.containsThisFieldAll(field)) {
+				return at;
+			}
+		}
+
+		Debug.error("テーブルが見つかりません。", getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName());
+		return null;
+	}
+	
 	
 	
 	

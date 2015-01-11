@@ -82,8 +82,8 @@ public class Panel_FieldList extends JPanel implements ActionListener,Serializab
 		boolean japanese = GeneratorProperty.japanese();
 		
 		fieldTableColumnNames = japanese ?
-									new String[]{"フィールド名", "データ型", "最小値", "最大値"} :
-									new String[]{"Field Name", "Data Type", "Minimum", "Maximum"};
+									new String[]{"フィールド名", "データ型", "最小値", "最大値","タイプ"} :
+									new String[]{"Field Name", "Data Type", "Minimum", "Maximum","Field Type"};
 		
 		springLayout = new SerializableSpringLayout();
 		setLayout(springLayout);
@@ -282,6 +282,10 @@ public class Panel_FieldList extends JPanel implements ActionListener,Serializab
 			else {
 				Debug.error("想定外のデータ型です。", getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName());
 			}
+			
+			// 項目「タイプ」【追加】
+			if(field.isFixed) fieldTableValues[i][4] = japanese? "固定":"Fixed";
+			else if(!field.isFixed) fieldTableValues[i][4] = japanese? "抽象":"Abstract";
 		}
 		
 		// 新たなモデルをセット
@@ -354,7 +358,8 @@ public class Panel_FieldList extends JPanel implements ActionListener,Serializab
 				return;
 			}
 			
-			this.table.removeField(selectedField);
+			if(selectedField.isFixed)this.table.removeField(selectedField);
+			this.table.removeFieldAllArray(selectedField);
 			this.refreshFieldTable();
 		}
 		else if(cmd.equals("遷移 : テーブル一覧画面")) {

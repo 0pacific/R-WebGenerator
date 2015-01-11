@@ -488,11 +488,13 @@ public class PanelAccountTableDefinition extends JPanel implements ActionListene
 				int max = Integer.parseInt(this.textFieldUseridMax.getText());
 				Field useridField = new Field(fieldName, Field.DATATYPE_USERID, min, max);
 				newTable.addField(useridField);
+				newTable.addFieldAllArray(useridField);
 			}
 			else if(selectedIdType.equals(japanese?"メールアドレスで認証する":"Identify by Mail Address")) {
 				String fieldName = this.textFieldMailAuthName.getText();
 				Field mailAuthField = new Field(fieldName, Field.DATATYPE_MAIL_AUTH);
 				newTable.addField(mailAuthField);
+				newTable.addFieldAllArray(mailAuthField);
 			}
 			else {
 				Debug.error("コンボボックスの値が想定外です。", getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName());
@@ -505,6 +507,7 @@ public class PanelAccountTableDefinition extends JPanel implements ActionListene
 			int max = Integer.parseInt(this.textFieldPasswordMax.getText());
 			Field passwordField = new Field(passwordFieldName, Field.DATATYPE_PASSWORD, min, max);
 			newTable.addField(passwordField);
+			newTable.addFieldAllArray(passwordField);
 			
 			// TableManagerに追加
 			TableManager.getInstance().addAccountTable(newTable);

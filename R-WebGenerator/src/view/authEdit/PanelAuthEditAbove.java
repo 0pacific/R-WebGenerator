@@ -229,10 +229,14 @@ public class PanelAuthEditAbove extends JPanel implements ActionListener,Seriali
 			
 			// 各フィールドのRead, Write, ExWrite（ロール権限）
 			// ◆ここのコードは個人権限の場合とかなり重複
-			int fieldNum = table.getFieldNum();
+			int fieldNum = table.getAllFieldNum();
 			for(int i=0; i<fieldNum; i++) {
-				Field field = table.getField(i);
+				Field field = table.getAllField(i);
 				String fieldName = field.getFieldName();
+				if(!field.isFixed){
+					if(japanese)fieldName = fieldName + "（抽象）";
+					else fieldName = fieldName + "-Abstract-";
+				}
 
 				// このフィールドの部分の、上のコンポーネントからの距離
 				int HEIGHT = 30*i + 20;
@@ -350,8 +354,13 @@ public class PanelAuthEditAbove extends JPanel implements ActionListener,Seriali
 				// 各フィールドのRead, Write, ExWrite（個人権限）
 				// ◆ここのコードはロール権限の場合とかなり重複
 				for(int i=0; i<fieldNum; i++) {
-					Field field = table.getField(i);
+					Field field = table.getAllField(i);
 					String fieldName = field.getFieldName();
+					
+					if(!field.isFixed){
+						if(japanese)fieldName = fieldName + "（抽象）";
+						else fieldName = fieldName + "-Abstract-";
+					}
 
 					// このフィールドの部分の、上のコンポーネントからの距離
 					int HEIGHT = 30*i + 20;
@@ -517,11 +526,15 @@ public class PanelAuthEditAbove extends JPanel implements ActionListener,Seriali
 		
 		// 各フィールドのRead, Write, ExWrite（ロール権限）
 		// ◆ここのコードは個人権限の場合とかなり重複
-		int fieldNum = table.getFieldNum();
+		int fieldNum = table.getAllFieldNum();
 		for(int i=0; i<fieldNum; i++) {
-			Field field = table.getField(i);
+			Field field = table.getAllField(i);
 			String fieldName = field.getFieldName();
 
+			if(!field.isFixed){
+				if(japanese)fieldName = fieldName + "（抽象）";
+				else fieldName = fieldName + "-Abstract-";
+			}
 			// このフィールドの部分の、上のコンポーネントからの距離
 			int HEIGHT = 30*i + 20;
 			
@@ -650,9 +663,13 @@ public class PanelAuthEditAbove extends JPanel implements ActionListener,Seriali
 			// 各フィールドのRead, Write, ExWrite（個人権限）
 			// ◆ここのコードはロール権限の場合とかなり重複
 			for(int i=0; i<fieldNum; i++) {
-				Field field = table.getField(i);
+				Field field = table.getAllField(i);
 				String fieldName = field.getFieldName();
 
+				if(!field.isFixed){
+					if(japanese)fieldName = fieldName + "（抽象）";
+					else fieldName = fieldName + "-Abstract-";
+				}
 				// このフィールドの部分の、上のコンポーネントからの距離
 				int HEIGHT = 30*i + 20;
 				

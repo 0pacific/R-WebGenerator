@@ -28,13 +28,13 @@ public class AccountTable extends SuperTable {
 	public void addField(Field field) {
 		fieldArray.add(field);
 		field.setTable(this);
-		TableManager.getInstance().informFieldAddition(field);
+		//TableManager.getInstance().informFieldAddition(field);
 	}
 	
-	public void addAbField(AbstractField field) {
-		fieldArray.add(field);
+	public void addFieldAllArray(Field field) {
+		allFieldArray.add(field);
 		field.setTable(this);
-		TableManager.getInstance().informAbFieldAddition(field);
+		TableManager.getInstance().informFieldAddition(field);
 	}
 
 	public NormalRole getNormalRole(int index) {
