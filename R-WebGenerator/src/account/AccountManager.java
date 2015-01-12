@@ -39,9 +39,6 @@ public class AccountManager {
 		return this.createrAccount;
 	}
 	
-	public static AccountManager getInstance(){
-		return obj;
-	}
 	
 	public int getMODE(){
 		return MODE;
@@ -53,5 +50,26 @@ public class AccountManager {
 	
 	public void setAdmins(){
 		this.MODE = ADMINS_MODE;
+	}
+	
+	public boolean isExistAdmin(){
+		if(adminAccount.getID()==""){
+			return false;
+		}
+		else return true;
+	}
+	
+	public boolean isExistCreater(){
+		if(createrAccount.getID()==""){
+			return false;
+		}
+		else return true;
+	}
+	public static AccountManager getInstance(){
+		return obj;
+	}
+	
+	public static void updateInstance(AccountManager newObj){
+		AccountManager.obj = newObj;
 	}
 }

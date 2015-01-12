@@ -1,5 +1,12 @@
 /generatedFiles
+/utility
 /.DS_Store
+/table
+/test
+/tpp
+/transition
+/view
+/webPage
 /account
 /adminAuth
 /authority
@@ -10,10 +17,3 @@
 /pageElement
 /property
 /role
-/table
-/test
-/tpp
-/transition
-/view
-/webPage
-/utility

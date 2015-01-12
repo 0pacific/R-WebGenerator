@@ -8,6 +8,8 @@ import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
 
+import account.AccountManager;
+import adminAuth.AdminAuthManager;
 import authority.*;
 import debug.*;
 import executer.generation.mysql.*;
@@ -19,7 +21,6 @@ import gui.arrow.*;
 import mainFrame.*;
 import pageElement.*;
 import role.*;
-import role.RoleManager;
 import table.*;
 import table.field.*;
 import test.*;
@@ -70,6 +71,8 @@ public class SynthesisObject implements Serializable {
 	public AuthorityManager authorityManager = AuthorityManager.getInstance();
 	public RoleManager roleManager = RoleManager.getInstance();
 	public TransitionManager transitionManager = TransitionManager.getInstance();
+	public AccountManager accountManager = AccountManager.getInstance();
+	public AdminAuthManager adminAuthManager = AdminAuthManager.getInstance();
 
 	// Webページ定義画面
 	public PanelWebPageDefAbove panelWebPageDefAbove = PanelWebPageDefAbove.getInstance();
@@ -159,6 +162,8 @@ public class SynthesisObject implements Serializable {
 		AuthorityManager.updateInstance(authorityManager);
 		RoleManager.updateInstance(roleManager);
 		TransitionManager.updateInstance(transitionManager);
+		AccountManager.updateInstance(accountManager);
+		AdminAuthManager.updateInstance(adminAuthManager);
 
 		// Webページ定義画面
 		PanelWebPageDefAbove.updateInstance(panelWebPageDefAbove);

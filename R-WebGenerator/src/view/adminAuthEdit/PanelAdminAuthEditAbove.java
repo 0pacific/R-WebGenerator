@@ -292,5 +292,9 @@ public class PanelAdminAuthEditAbove extends JPanel implements ActionListener,Se
 	public static PanelAdminAuthEditAbove getInstance(){
 		return PanelAdminAuthEditAbove.obj;
 	}
+	
+	public static void updateInstance(PanelAdminAuthEditAbove newObj){
+		PanelAdminAuthEditAbove.obj = newObj;
+	}
 
 }

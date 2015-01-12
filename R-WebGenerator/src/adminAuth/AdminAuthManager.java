@@ -19,11 +19,11 @@ public class AdminAuthManager {
 		
 	}
 	
-	public AdminAuthManager getInstance(){
+	public static AdminAuthManager getInstance(){
 		return AdminAuthManager.obj;
 	}
 	
-	public void updateInstance(AdminAuthManager newObj){
+	public static void updateInstance(AdminAuthManager newObj){
 		AdminAuthManager.obj = newObj;
 	}
 
